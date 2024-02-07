@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+input {
+  @apply w-[400px] border border-gray-200
+    py-2 px-6 bg-zinc-100/40;
+}
+
+label span {
+  @apply text-red-500;
+}
+
+ul,
+li {
+  list-style: none;
+}
+
+@media (max-width: 425px) {
+  input {
+    @apply max-w-[300px];
+  }
+}
