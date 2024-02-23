@@ -1,20 +1,11 @@
+import { IUser } from "@/types/types";
 import mongoose, { Schema, Model, Document } from "mongoose";
-
-// Define interface for User document
-export interface IUser extends Document {
-  name?: string;
-  email: string;
-  password?: string;
-  image?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 const userSchema = new Schema(
   {
     name: {
       type: String,
-      required: false,
+      required: true,
     },
     email: {
       type: String,
@@ -26,7 +17,7 @@ const userSchema = new Schema(
     },
     image: {
       type: String,
-      required: false,
+      required: true,
     },
   },
   { timestamps: true }
