@@ -7,12 +7,15 @@ const Page = async () => {
 
   //if user is already authenticated
   if (session) {
-    redirect("/dashboard");
+    redirect("/courses");
   }
+
   return (
     <>
-      <h1 className="text-xl font-bold my-4">login</h1>
-      <LoginForm />
+      <>
+        <h1 className="text-xl font-bold my-4">login</h1>
+        <LoginForm />
+      </>
     </>
   );
 };

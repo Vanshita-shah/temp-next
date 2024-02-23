@@ -7,7 +7,7 @@ const Page = async () => {
 
   //if user is already authenticated
   if (session) {
-    redirect("/dashboard");
+    redirect("/courses");
   }
   return (
     <>
