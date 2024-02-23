@@ -2,18 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
-input {
+/* Theme variables */
+:root {
+  --primary-color: rgb(168 85 247); /*500*/
+  --primary-light-color: rgb(233 213 255);
+  --primary-dark-color: rgb(126, 34, 206); /*700*/
+  --border-color: rgb(192, 132, 252);
+  --success-light-color: rgb(233 255 224);
+  --error-color: rgb(239 68 68);
+  --error-light-color: rgb(255 224 224);
+}
+
+body {
+  overflow: hidden;
+  word-break: break-word;
+  text-align: justify;
+}
+
+input,
+textarea {
   @apply w-[400px] border border-gray-200
     py-2 px-6 bg-zinc-100/40;
 }
 
 label span {
-  @apply text-red-500;
+  @apply text-error;
 }
 
 ul,
 li {
   list-style: none;
+}
+
+/* customised scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background-color: #f2f2f2;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--primary-light-color);
+  border-radius: 5px;
 }
 
 @media (max-width: 425px) {
