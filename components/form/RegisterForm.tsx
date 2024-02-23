@@ -2,11 +2,11 @@
 import Button from "@/components/form/Button";
 import ErrorMsg from "@/components/form/ErrorMsg";
 import SignInWithGoogle from "@/components/form/SignInWithGoogle";
-import UserProfile from "@/components/form/UserProfile";
-import { registerAction } from "@/app/utils/action";
+import { registerAction } from "@/app/utils/actions/registerAction";
 import Link from "next/link";
 
 import { useFormState } from "react-dom";
+import FormImage from "@/components/form/FormImage";
 
 const RegisterForm = () => {
   // Server Actions with useFormState : for state management and error handling
@@ -18,7 +18,8 @@ const RegisterForm = () => {
         Profile <span>*</span>
         <span className="text-gray-400 text-sm">.png/.jpg/.jpeg</span>
       </label>
-      <UserProfile />
+      <FormImage />
+      {state.profile && <ErrorMsg error={state.profile} />}
       <label htmlFor="name" className="mt-3">
         Name <span>*</span>
       </label>

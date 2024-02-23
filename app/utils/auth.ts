@@ -1,9 +1,10 @@
 import User from "@/models/user";
-import { Account, User as AuthUser } from "next-auth";
+import { Account, User as AuthUser, Session } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { connectMongoDB } from "@/lib/mongodb";
+import { redirect } from "next/navigation";
 
 interface SignInParams {
   user: AuthUser;
@@ -19,7 +20,7 @@ export const authOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials): Promise<any> {
         await connectMongoDB();
         try {
           if (credentials) {
@@ -68,11 +69,12 @@ export const authOptions = {
           // If user does not exist : New user
           if (!existingUser) {
             const newUser = new User({
+              name: user.name,
               email: user.email,
+              image: user.image,
             });
 
             await newUser.save();
-            return true;
           }
           return true;
         } catch (err) {
@@ -83,10 +85,10 @@ export const authOptions = {
     },
 
     // managing token, internally used in middleware
-    async jwt({ token, user, session }) {
+    async jwt({ token }: { token: string }) {
       return token;
     },
-    async session({ token, session, user }) {
+    async session({ session }: { session: Session | null }) {
       return session;
     },
   },

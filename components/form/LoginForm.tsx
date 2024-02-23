@@ -32,7 +32,7 @@ const LoginForm = () => {
       setError(res.error);
     } else {
       // if login successfull redirect to dashboard page
-      router.push("/dashboard");
+      router.push("/courses");
     }
   };
 
