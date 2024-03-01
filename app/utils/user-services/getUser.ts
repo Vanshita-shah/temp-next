@@ -16,13 +16,3 @@ export const getUserID = async (email: string) => {
   const userData = await getUser(email);
   return userData._id;
 };
-
-export const getCourses = async () => {
-  const res = await fetch(`${process.env.BASE_URL}/api/courses`, {
-    cache: "no-cache",
-  });
-
-  const data: CoursesAPIResponse = await res.json();
-
-  return data.courses;
-};

@@ -8,13 +8,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import React from "react";
 
-const getMyCourses = async () => {
+const getMyCourses = async (query?: string) => {
   const session = await getServerSession();
   const email = session?.user.email;
+  const url = query ? `query=${query}` : "";
 
   if (email) {
     const res = await fetch(
-      `${process.env.BASE_URL}/api/courses?email=${email}`
+      `${process.env.BASE_URL}/api/courses?email=${email}&${url}`
     );
 
     const data: CoursesAPIResponse = await res.json();
@@ -23,11 +24,19 @@ const getMyCourses = async () => {
   }
 };
 
-const MyCourses = async ({ params }: { params: { id: string } }) => {
+const MyCourses = async ({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams?: {
+    query?: string;
+  };
+}) => {
   const session = await getServerSession();
   const email = session?.user.email;
-  const courses = await getMyCourses();
   const userId = await getUserID(email!);
+  const courses = await getMyCourses(searchParams?.query);
 
   if (userId !== params.id) {
     notFound();
@@ -36,6 +45,7 @@ const MyCourses = async ({ params }: { params: { id: string } }) => {
   return (
     <>
       <div className=" mx-auto max-w-[100%] md:max-w-[60%] h-[100%] overflow-hidden">
+        <Filter />
         {courses?.[0] ? <Courses courses={courses} /> : <NoDataAvailable />}
       </div>
     </>

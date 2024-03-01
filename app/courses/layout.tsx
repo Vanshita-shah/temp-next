@@ -1,3 +1,5 @@
+import Navbar from "@/components/navbar/Navbar";
+
 export default function Layout({
   modal,
   children,
@@ -7,6 +9,8 @@ export default function Layout({
 }) {
   return (
     <>
+      {/* <Filter /> */}
+      <Navbar />
       {modal}
       {children}
     </>

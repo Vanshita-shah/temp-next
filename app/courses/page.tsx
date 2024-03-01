@@ -1,30 +1,37 @@
 import Courses from "@/components/courses/Courses";
-import CoursesContainer from "@/components/courses/CoursesContainer";
 import Filter from "@/components/filter/Filter";
+import Loader from "@/components/loader/Loader";
+import NoDataAvailable from "@/components/no-data/NoDataAvailable";
 import { CoursesAPIResponse } from "@/types/types";
+import { Suspense } from "react";
+import { getCourses } from "../utils/course-services/CourseServices";
 
-const getCourses = async () => {
-  try {
-    const res = await fetch(`${process.env.BASE_URL}/api/courses`, {
-      cache: "no-cache",
-    });
-
-    const data: CoursesAPIResponse = await res.json();
-    return data.courses;
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-const Dashboard = async () => {
-  const courses = await getCourses();
+const Dashboard = async ({
+  searchParams,
+}: {
+  searchParams?: {
+    query?: string;
+  };
+}) => {
+  const courses = await getCourses(searchParams?.query);
 
   return (
     <>
       <div className=" mx-auto max-w-[100%] md:max-w-[60%] h-[100%] overflow-hidden">
         <Filter />
-        {courses && <Courses courses={courses} />}
-        {/* {courses && <CoursesContainer courses={courses} />} */}
+        {searchParams?.query ? (
+          courses && courses?.[0] ? (
+            <Suspense fallback={<Loader />}>
+              <Courses courses={courses} />
+            </Suspense>
+          ) : (
+            <NoDataAvailable />
+          )
+        ) : courses && courses?.[0] ? (
+          <Courses courses={courses} />
+        ) : (
+          <NoDataAvailable />
+        )}
       </div>
     </>
   );
