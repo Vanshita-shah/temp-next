@@ -42,7 +42,11 @@ const CourseCardActions = ({
             onClick={() => setShowPopUp(true)}
           />
           {showPopUp && (
-            <DeletePopup setShowPopUp={setShowPopUp} id={course._id} />
+            <DeletePopup
+              setShowPopUp={setShowPopUp}
+              id={course._id}
+              courseName={course.courseName}
+            />
           )}
         </>
       )}

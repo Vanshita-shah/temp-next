@@ -8,6 +8,7 @@ import { getCourse } from "../course-services/CourseServices";
 import { ICourse } from "@/types/types";
 import { zfd } from "zod-form-data";
 import { z } from "zod";
+import { deletePhotoFromCloudinary } from "../cloudinary/config";
 
 // validation schema for registration form
 const courseSchema = zfd.formData({
@@ -34,6 +35,10 @@ export const courseAction = async (
       courseImage: formData.get("form-image") as File,
     });
 
+    const courseName = formData.get("course-name") as string;
+    const description = formData.get("course-description") as string;
+    const link = formData.get("course-link") as string;
+
     // handling validation errors
     if (!validatedFields.success) {
       const errors: Record<string, string[]> =
@@ -58,15 +63,15 @@ export const courseAction = async (
 
     const courseImg = formData.get("form-image") as File;
 
-    const imageURL = await convertImageToURL(courseImg);
+    const imageURL = await convertImageToURL(courseImg, courseName);
 
     //course data
     const body = {
       creator: email,
-      courseName: formData.get("course-name") as string,
-      description: formData.get("course-description") as string,
+      courseName: courseName,
+      description: description,
       prerequisites: prerequisites,
-      link: formData.get("course-link") as string,
+      link: link,
       courseImage: imageURL,
     };
 
@@ -103,7 +108,7 @@ export const courseAction = async (
   }
 };
 
-export const deleteAction = async (id: string) => {
+export const deleteAction = async (id: string, courseName: string) => {
   try {
     const res = await fetch(
       `${process.env.BASE_URL}/api/courses/delete-course`,
@@ -113,6 +118,8 @@ export const deleteAction = async (id: string) => {
         body: JSON.stringify(id),
       }
     );
+
+    deletePhotoFromCloudinary(courseName);
 
     if (res.ok) {
       revalidateTag("courses");
@@ -137,7 +144,7 @@ export const editCourseAction = async (
   const courseImg = formData.get("form-image") as File;
   let imageURL = courseData.courseImage;
   if (courseImg.name !== "undefined") {
-    imageURL = await convertImageToURL(courseImg);
+    imageURL = await convertImageToURL(courseImg, courseData.courseName);
   }
 
   const editedCourseData: Omit<ICourse, "_id" | "creator"> = {

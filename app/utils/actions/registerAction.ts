@@ -44,8 +44,10 @@ export const registerAction = async (
 
     return formattedErrors;
   }
-  const password = formData.get("password");
-  const confirmPassword = formData.get("confirm-password");
+
+  const courseName = formData.get("name") as string;
+  const password = formData.get("password") as string;
+  const confirmPassword = formData.get("confirm-password") as string;
 
   if (confirmPassword !== password) {
     return { confirm: "Password doesn't match!" };
@@ -54,7 +56,7 @@ export const registerAction = async (
   //convert profilepic into base64 string
   const profilepic = formData.get("form-image") as File;
 
-  const imageURL = await convertProfileToURL(profilepic);
+  const imageURL = await convertProfileToURL(profilepic, courseName);
 
   //user data
   const body = {

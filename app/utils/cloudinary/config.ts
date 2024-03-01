@@ -7,15 +7,27 @@ cloudinary.config({
 });
 
 // Image file upload to cloudinary in user-profiles folder
-export const uploadProfileToCloudinary = async (file: string) => {
+export const uploadProfileToCloudinary = async (file: string, name: string) => {
   const uploadResponse = await cloudinary.uploader.upload(file, {
     folder: "user-profiles",
+    public_id: `${name}`,
+  });
+
+  return uploadResponse.secure_url;
+};
+
+export const uploadPhotoToCloudinary = async (file: string, name: string) => {
+  const uploadResponse = await cloudinary.uploader.upload(file, {
+    folder: "course-images",
+    public_id: `${name}`,
   });
   return uploadResponse.secure_url;
 };
-export const uploadPhotoToCloudinary = async (file: string) => {
-  const uploadResponse = await cloudinary.uploader.upload(file, {
-    folder: "course-images",
+
+export const deletePhotoFromCloudinary = async (name: string) => {
+  console.log("NAME IS: ", name);
+
+  cloudinary.uploader.destroy(`course-images/${name}`, function (result) {
+    console.log(result);
   });
-  return uploadResponse.secure_url;
 };

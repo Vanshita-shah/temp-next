@@ -14,12 +14,16 @@ export async function PUT(req: Request) {
 
   try {
     if (id) {
+      const course = await Course.findById(id);
       const existingCourse = await Course.findOne({
         courseName: editedCourseData.courseName,
       });
 
       //when course-name already exists
-      if (existingCourse !== null) {
+      if (
+        existingCourse &&
+        existingCourse._id.toString() !== course?._id.toString()
+      ) {
         return NextResponse.json(
           { message: "course name already exists" },
           { status: 403 }

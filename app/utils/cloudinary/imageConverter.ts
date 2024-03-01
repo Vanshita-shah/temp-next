@@ -20,18 +20,18 @@ const convertImageToBase64 = async (image: File) => {
   return base64File;
 };
 
-export const convertProfileToURL = async (image: File) => {
+export const convertProfileToURL = async (image: File, name: string) => {
   const base64File = await convertImageToBase64(image);
   //get image url from cloudinary
-  const imageURL = await uploadProfileToCloudinary(base64File);
+  const imageURL = await uploadProfileToCloudinary(base64File, name);
 
   return imageURL;
 };
 
-export const convertImageToURL = async (image: File) => {
+export const convertImageToURL = async (image: File, name: string) => {
   const base64File = await convertImageToBase64(image);
   //get image url from cloudinary
-  const imageURL = await uploadPhotoToCloudinary(base64File);
+  const imageURL = await uploadPhotoToCloudinary(base64File, name);
 
   return imageURL;
 };
