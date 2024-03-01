@@ -1,5 +1,5 @@
 import User from "@/models/user";
-import { Account, User as AuthUser, Session } from "next-auth";
+import { Account, User as AuthUser } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
@@ -20,7 +20,9 @@ export const authOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials): Promise<any> {
+      authorize: async (
+        credentials: Record<"email" | "password", string> | undefined
+      ): Promise<AuthUser | null> => {
         await connectMongoDB();
         try {
           if (credentials) {
@@ -33,7 +35,7 @@ export const authOptions = {
                 user.password
               );
               if (isPasswordCorrect) {
-                return user;
+                return user as AuthUser;
               } else {
                 throw new Error("invalid password");
               }
@@ -41,10 +43,12 @@ export const authOptions = {
               throw new Error("User doesn't exist");
             }
           }
+          return null;
         } catch (err: unknown) {
           if (err instanceof Error) {
             throw new Error(err.message);
           }
+          return null;
         }
       },
     }),
@@ -58,11 +62,11 @@ export const authOptions = {
 
   callbacks: {
     async signIn({ user, account }: SignInParams) {
-      if (account?.provider == "credentials") {
+      if (account!.provider == "credentials") {
         return true;
       }
 
-      if (account?.provider == "google") {
+      if (account!.provider == "google") {
         await connectMongoDB();
         try {
           const existingUser = await User.findOne({ email: user.email });
@@ -83,22 +87,8 @@ export const authOptions = {
         }
       }
     },
-
-    // managing token, internally used in middleware
-    async jwt({ token }: { token: string }) {
-      return token;
-    },
-    async session({ session }: { session: Session | null }) {
-      return session;
-    },
   },
-
-  secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/login",
-  },
-
-  session: {
-    strategy: "jwt",
   },
 };
