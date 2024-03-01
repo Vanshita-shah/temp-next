@@ -6,9 +6,9 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest) {
   console.log("User api");
 
+  const email = request.nextUrl.searchParams.get("email");
   try {
     await connectMongoDB();
-    const email = request.nextUrl.searchParams.get("email");
     console.log(email);
 
     if (email) {

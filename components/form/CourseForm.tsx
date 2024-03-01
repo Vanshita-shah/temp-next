@@ -8,7 +8,7 @@ import {
 import ErrorMsg from "./ErrorMsg";
 import FormImage from "./FormImage";
 import { ICourse } from "@/types/types";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 
 const CourseForm = ({
@@ -22,11 +22,17 @@ const CourseForm = ({
   const parts = pathname.split("/");
   const id = parts[parts.length - 1];
 
+  const router = useRouter();
+
   const [state, formAction] = useFormState(
     courseData ? editCourseAction : courseAction,
     { message: "" }
   );
   const prerequisites = courseData?.prerequisites.join(",");
+
+  if (state.message === "Course Edited Successfully") {
+    router.back();
+  }
 
   return (
     <form action={formAction} className="flex flex-col ">

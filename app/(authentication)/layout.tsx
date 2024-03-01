@@ -11,11 +11,5 @@ export default async function RootLayout({
   if (session) {
     redirect("/courses");
   }
-  return (
-    <div className="grid place-items-center h-[100%] ">
-      <div className="gap-3 shadow-lg p-5 rounded-lg border-t-4 border-border-color">
-        {children}
-      </div>
-    </div>
-  );
+  return <div className="grid place-items-center h-[100%] ">{children}</div>;
 }

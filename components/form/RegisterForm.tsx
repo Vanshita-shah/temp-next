@@ -54,6 +54,17 @@ const RegisterForm = () => {
         required
       />
       {state.password && <ErrorMsg error={state.password} />}
+      <label htmlFor="confirm-password" className="mt-3">
+        Confirm Password <span>*</span>
+      </label>
+      <input
+        type="password"
+        id="confirm-password"
+        name="confirm-password"
+        placeholder="enter password again"
+        required
+      />
+      {state.confirm && <ErrorMsg error={state.confirm} />}
 
       {state.message && <ErrorMsg error={state.message} />}
 

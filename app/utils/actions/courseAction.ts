@@ -1,7 +1,7 @@
 "use server";
 
 import { getServerSession } from "next-auth";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { convertImageToURL } from "../cloudinary/imageConverter";
 import { getCourse } from "../course-services/CourseServices";
@@ -84,7 +84,7 @@ export const courseAction = async (
       );
 
       if (res.ok) {
-        redirect("/courses");
+        revalidateTag("courses");
       } else if (res.status === 403) {
         //course name conflict
         return { message: "Course Name Already Exists" };
@@ -97,6 +97,7 @@ export const courseAction = async (
       }
       return { message: "Something went wrong" };
     }
+    redirect("/courses");
   } else {
     return { message: "something went wrong" };
   }
@@ -114,7 +115,7 @@ export const deleteAction = async (id: string) => {
     );
 
     if (res.ok) {
-      revalidatePath("/");
+      revalidateTag("courses");
       return { message: "Course Deleted Successfully!" };
     }
   } catch (err) {
@@ -128,7 +129,7 @@ export const editCourseAction = async (
   formData: FormData
 ) => {
   const courseId = formData.get("courseId") as string;
-  const courseData = await getCourse(courseId);
+  const courseData = (await getCourse(courseId)) as ICourse;
 
   const prerequisitesString = formData.get("course-prerequisite") as string;
   const prerequisites = prerequisitesString.split(",");
@@ -136,8 +137,6 @@ export const editCourseAction = async (
   const courseImg = formData.get("form-image") as File;
   let imageURL = courseData.courseImage;
   if (courseImg.name !== "undefined") {
-    console.log(courseImg);
-
     imageURL = await convertImageToURL(courseImg);
   }
 
@@ -154,8 +153,6 @@ export const editCourseAction = async (
   const isEqual = (editedCourseData: Omit<ICourse, "_id" | "creator">) => {
     const keys = Object.keys(editedCourseData).filter((key) => key !== "_id");
     for (let key of keys) {
-      console.log(key);
-
       if (!(key in courseData)) {
         return false;
       }
@@ -170,7 +167,6 @@ export const editCourseAction = async (
   };
 
   if (isEqual(editedCourseData)) {
-    console.log("courseData is equal to editedCoursedata");
     return { message: "Nothing to Update!" };
   }
 
@@ -186,19 +182,16 @@ export const editCourseAction = async (
 
       body: JSON.stringify([editedCourseData, courseData._id]),
     });
-
     if (res.ok) {
-      revalidatePath("/");
-      redirect("/courses");
+      revalidateTag("courses");
+    } else if (res.status === 403) {
+      //course name conflict
+      return { message: "Course Name Already Exists" };
     } else {
       throw new Error("Something went wrong");
     }
   } catch (err: any) {
-    // if (err.message.includes("NEXT_REDIRECT")) {
-    //   redirect("/courses");
-    // }
-
-    // return { message: err.message };
     return { message: "Something went wrong" };
   }
+  redirect("/courses");
 };

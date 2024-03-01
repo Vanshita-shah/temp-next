@@ -3,9 +3,10 @@ import Link from "next/link";
 import NavMenu from "./NavMenu";
 import { IUser } from "@/types/types";
 import { getServerSession } from "next-auth";
-export const dynamic = "force-dynamic";
+
 const Navbar = async () => {
   const session = await getServerSession();
+  console.log("Here is the session", session);
 
   const getUser = async () => {
     if (session?.user.email) {
@@ -27,7 +28,7 @@ const Navbar = async () => {
             CourseApp
           </Link>
         </div>
-        {id && <NavMenu userId={id} />}
+        <NavMenu userId={id} />
       </div>
     </>
   );

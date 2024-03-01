@@ -4,12 +4,22 @@ import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
+  const email = request.nextUrl.searchParams.get("email");
+  const id = request.nextUrl.searchParams.get("id");
+  const query = request.nextUrl.searchParams.get("query");
   try {
-    const email = request.nextUrl.searchParams.get("email");
-    const id = request.nextUrl.searchParams.get("id");
-
     await connectMongoDB();
     if (email) {
+      console.log("email is", email, "query is ", query);
+      if (query) {
+        const courses = await Course.find({
+          $and: [
+            { creator: email }, // Condition 1: Match documents where the creator field equals the provided email
+            { courseName: { $regex: query, $options: "i" } }, // Condition 2: Match documents where the courseName field matches the query (case-insensitive)
+          ],
+        });
+        return NextResponse.json({ courses }, { status: 200 });
+      }
       const courses = await Course.find({ creator: email });
       return NextResponse.json({ courses }, { status: 200 });
     }
@@ -17,6 +27,14 @@ export async function GET(request: NextRequest) {
     if (id) {
       const course = await Course.find({ _id: new ObjectId(id) });
       return NextResponse.json({ course }, { status: 200 });
+    }
+
+    if (query) {
+      const courses = await Course.find({
+        courseName: { $regex: query, $options: "i" },
+      });
+
+      return NextResponse.json({ courses }, { status: 200 });
     }
     const courses = await Course.find();
 

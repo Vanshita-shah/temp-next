@@ -44,6 +44,12 @@ export const registerAction = async (
 
     return formattedErrors;
   }
+  const password = formData.get("password");
+  const confirmPassword = formData.get("confirm-password");
+
+  if (confirmPassword !== password) {
+    return { confirm: "Password doesn't match!" };
+  }
 
   //convert profilepic into base64 string
   const profilepic = formData.get("form-image") as File;
@@ -71,13 +77,10 @@ export const registerAction = async (
     if (res.status === 403) {
       return { message: "User Already Exists" };
     }
-    if (res.ok) {
-      redirect("/login");
-    }
   } catch (err) {
     console.log(err);
 
     return { message: "Something went wrong" };
   }
-  return { message: "" };
+  redirect("/login");
 };

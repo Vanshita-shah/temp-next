@@ -5,6 +5,7 @@ import { useFormStatus } from "react-dom";
 
 const Button = ({ text }: { text: string }) => {
   const { pending } = useFormStatus();
+  console.log(pending);
 
   return (
     <>

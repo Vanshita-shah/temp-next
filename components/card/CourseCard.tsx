@@ -16,6 +16,7 @@ const CourseCard = async ({
   // console.log(course);
 
   const userData = users.filter((user) => user.email === course.creator)[0];
+
   return (
     <>
       <div className="border border-gray-400 rounded ">
@@ -37,11 +38,10 @@ const CourseCard = async ({
           <div className="text-sm">
             <p className="text-gray-900 leading-none">{course.creator}</p>
           </div>
-          {course.creator === currentUser && (
-            <div className="flex-1 flex items-center justify-end gap-2 text-[1.2rem] ">
-              <CourseCardActions course={course} />
-            </div>
-          )}
+
+          <div className="flex-1 flex items-center justify-end gap-2 text-[1.2rem] ">
+            <CourseCardActions course={course} currentUser={currentUser} />
+          </div>
         </div>
       </div>
     </>

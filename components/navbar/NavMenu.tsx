@@ -6,6 +6,7 @@ import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { IUser } from "@/types/types";
+import { usePathname } from "next/navigation";
 
 // Navigation links for authenticated and unauthenticated users
 
@@ -22,9 +23,9 @@ const unauthentictedLinks = [
   },
 ];
 
-const NavMenu = ({ userId }: { userId: string }) => {
+const NavMenu = ({ userId }: { userId?: string }) => {
   const { data: session, status: sessionStatus } = useSession();
-  console.log(session);
+  const pathName = usePathname();
 
   // State for controlling visibility of mobile navigation menu
   const [nav, setNav] = useState(false);
@@ -59,7 +60,9 @@ const NavMenu = ({ userId }: { userId: string }) => {
           links.map(({ id, link, href }) => (
             <Link
               key={id}
-              className="nav-links px-4 cursor-pointer capitalize font-medium text-white hover:underline hover:text-white duration-200"
+              className={`nav-links px-4 cursor-pointer capitalize font-medium text-white hover:underline hover:text-white duration-200 ${
+                pathName === href ? "underline" : ""
+              }`}
               href={href}
             >
               {link}
@@ -105,7 +108,7 @@ const NavMenu = ({ userId }: { userId: string }) => {
 
       {/* Mobile navigation menu */}
       {nav && (
-        <div className="grid place-content-center absolute top-0 left-0 w-full h-screen bg-gray-100">
+        <div className="grid place-content-center absolute top-0 left-0 w-full h-screen bg-gray-100 md:hidden">
           <div className="flex  flex-col justify-center items-center">
             {session && imageUrl && (
               <Image
@@ -119,7 +122,9 @@ const NavMenu = ({ userId }: { userId: string }) => {
             {links.map(({ id, link, href }) => (
               <li
                 key={id}
-                className="px-4 cursor-pointer capitalize py-6 text-4xl"
+                className={` px-4 cursor-pointer capitalize py-6 text-4xl ${
+                  pathName === href ? "underline" : ""
+                }`}
               >
                 <Link onClick={() => setNav(!nav)} href={href}>
                   {link}
