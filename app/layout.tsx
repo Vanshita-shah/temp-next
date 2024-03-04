@@ -4,6 +4,8 @@ import "./globals.css";
 import Navbar from "@/components/navbar/Navbar";
 import { getServerSession } from "next-auth";
 import AuthProvider from "./utils/SessionProvider";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,6 +31,7 @@ export default async function RootLayout({
           {!session && <Navbar />}
           <div className="pt-[4rem] h-screen overflow-auto">{children}</div>
         </AuthProvider>
+        <ToastContainer autoClose={2000} />
       </body>
     </html>
   );

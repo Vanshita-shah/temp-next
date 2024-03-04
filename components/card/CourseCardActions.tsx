@@ -1,5 +1,5 @@
 "use client";
-import { deleteAction } from "@/app/utils/actions/courseAction";
+
 import { ICourse } from "@/types/types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

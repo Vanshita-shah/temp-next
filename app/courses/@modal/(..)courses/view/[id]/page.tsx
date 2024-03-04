@@ -3,6 +3,7 @@ import { getCourse } from "@/app/utils/course-services/CourseServices";
 import Modal from "@/components/modal/modal";
 import { getServerSession } from "next-auth";
 import Image from "next/image";
+import Link from "next/link";
 
 export default async function PhotoModal({
   params: { id },
@@ -56,13 +57,13 @@ export default async function PhotoModal({
               </ul>
 
               <h6 className="mb-1 text-lg font-bold">Link :</h6>
-              <a
+              <Link
                 href={courseData.link}
                 target="_blank"
                 className="mb-3 font-normal text-gray-700 dark:text-gray-400"
               >
                 {courseData.link}
-              </a>
+              </Link>
             </div>
           </div>
         </Modal>

@@ -7,8 +7,6 @@ import React from "react";
 const page = async () => {
   const session = await getServerSession();
 
-  console.log("FRont page");
-
   // //Redirect Authenticated user to dashboard page
   if (session) {
     redirect("/courses");

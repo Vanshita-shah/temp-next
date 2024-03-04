@@ -3,12 +3,13 @@ import React from "react";
 import { getCourse } from "@/app/utils/course-services/CourseServices";
 import { ICourse } from "@/types/types";
 import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
 
 const page = async ({ params }: { params: { id: string } }) => {
   const courseData = await getCourse(params.id);
-  // console.log("here", courseData);
+  const session = await getServerSession();
 
-  if (!courseData) {
+  if (!courseData || session?.user.email !== courseData.creator) {
     notFound();
   }
 

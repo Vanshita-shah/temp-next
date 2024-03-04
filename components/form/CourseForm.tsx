@@ -30,10 +30,6 @@ const CourseForm = ({
   );
   const prerequisites = courseData?.prerequisites.join(",");
 
-  if (state.message === "Course Edited Successfully") {
-    router.back();
-  }
-
   return (
     <form action={formAction} className="flex flex-col ">
       <label htmlFor="profile" className="mt-3">

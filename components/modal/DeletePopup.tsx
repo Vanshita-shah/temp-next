@@ -3,6 +3,7 @@ import { deleteAction } from "@/app/utils/actions/courseAction";
 import React, { Dispatch, SetStateAction, useState } from "react";
 import Loader from "../loader/Loader";
 import { deletePhotoFromCloudinary } from "@/app/utils/cloudinary/config";
+import { toast } from "react-toastify";
 
 const DeletePopup = ({
   id,
@@ -19,6 +20,11 @@ const DeletePopup = ({
     try {
       setIsLoading(true);
       const res = await deleteAction(id, courseName);
+      if (res.message === "Course Deleted Successfully!") {
+        toast(res.message, {
+          className: "toast-message",
+        });
+      }
     } catch (err) {
       console.log(err);
     }

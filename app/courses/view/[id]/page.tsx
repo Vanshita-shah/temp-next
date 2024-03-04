@@ -13,7 +13,7 @@ const page = async ({ params: { id } }: { params: { id: string } }) => {
   return (
     <div className="h-[100%] pt-[4rem] flex justify-center items-center  ">
       <div className="h-[100%]">
-        <div className="mx-[1rem] max-w-[500px] flex flex-col  gap-10 justify-center overflow-hidden bg-gray-50 overflow-y-auto p-5 rounded-md shadow shadow-primary-light">
+        <div className=" w-[300px] sm:w-[350px] max-w-sm flex flex-col  gap-10 justify-center overflow-hidden bg-gray-50 overflow-y-auto p-5 rounded-md shadow shadow-primary-light">
           <div className="w-[100%] h-[150px] sm:h-[250px] m-auto">
             <Image
               className="w-[100%] h-[100%] object-contain m-auto"

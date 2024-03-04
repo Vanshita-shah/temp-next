@@ -7,8 +7,9 @@ import { getServerSession } from "next-auth";
 
 const page = async ({ params }: { params: { id: string } }) => {
   const courseData = await getCourse(params.id);
+  const session = await getServerSession();
 
-  if (!courseData) {
+  if (!courseData || session?.user.email !== courseData.creator) {
     notFound();
   }
 

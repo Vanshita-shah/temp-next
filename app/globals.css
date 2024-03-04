@@ -45,3 +45,7 @@ li {
   background-color: var(--primary-light-color);
   border-radius: 5px;
 }
+
+.toast-message {
+  color: var(--primary-dark-color) !important;
+}
