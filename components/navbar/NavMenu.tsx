@@ -9,7 +9,6 @@ import { IUser } from "@/types/types";
 import { usePathname } from "next/navigation";
 
 // Navigation links for authenticated and unauthenticated users
-
 const unauthentictedLinks = [
   {
     id: 1,
@@ -60,7 +59,7 @@ const NavMenu = ({ userId }: { userId?: string }) => {
           links.map(({ id, link, href }) => (
             <Link
               key={id}
-              className={`nav-links px-4 cursor-pointer capitalize font-medium text-white hover:underline hover:text-white duration-200 ${
+              className={`nav-links px-4 cursor-pointer capitalize font-medium text-white hover:underline duration-200 ${
                 pathName === href ? "underline" : ""
               }`}
               href={href}
@@ -108,7 +107,7 @@ const NavMenu = ({ userId }: { userId?: string }) => {
 
       {/* Mobile navigation menu */}
       {nav && (
-        <div className="grid place-content-center absolute top-0 left-0 w-full h-screen bg-gray-100 md:hidden">
+        <div className="grid place-content-center absolute top-0 left-0 w-full h-screen bg-bg-color md:hidden">
           <div className="flex  flex-col justify-center items-center">
             {session && imageUrl && (
               <Image

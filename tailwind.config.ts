@@ -12,9 +12,13 @@ const config: Config = {
         sm: "475px",
       },
       colors: {
+        "bg-color": "var(--bg)",
         primary: "var( --primary-color)",
         "primary-dark": "var( --primary-dark-color)",
         "primary-light": "var( --primary-light-color)",
+        "gray-color": "var(--gray-color)",
+        "gray-dark": "var(--gray-dark)",
+        "gray-light": "var(--gray-light)",
         "border-color": "var( --border-color)",
         error: "var(--error-color)",
       },

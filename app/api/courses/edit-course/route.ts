@@ -29,7 +29,7 @@ export async function PUT(req: Request) {
           { status: 403 }
         );
       }
-      // Updating user based on its id
+      // Updating course based on its id
       const resp = await Course.updateOne(
         { _id: new ObjectId(id) },
         editedCourseData

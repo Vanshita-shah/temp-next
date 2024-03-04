@@ -4,8 +4,8 @@ import React from "react";
 import { useFormStatus } from "react-dom";
 
 const Button = ({ text }: { text: string }) => {
+  // track form submission status
   const { pending } = useFormStatus();
-  console.log(pending);
 
   return (
     <>

@@ -1,6 +1,5 @@
 import { ICourse } from "@/types/types";
-import mongoose, { Schema, Model, Document } from "mongoose";
-import { string } from "zod";
+import mongoose, { Schema, Model } from "mongoose";
 
 const courseSchema = new Schema(
   {

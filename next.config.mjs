@@ -2,7 +2,6 @@
 const nextConfig = {
   // Allowed remote URLs in Image component
   images: {
-    // loader: "cloudinary",
     remotePatterns: [
       {
         protocol: "https",

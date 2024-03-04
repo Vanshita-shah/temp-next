@@ -25,8 +25,8 @@ const LoginForm = () => {
     if (res?.error) {
       setError(res.error);
     } else {
-      router.replace("/courses");
       // if login successfull redirect to dashboard page
+      router.replace("/courses");
     }
   };
 

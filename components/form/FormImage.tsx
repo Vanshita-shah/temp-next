@@ -1,7 +1,6 @@
 "use client";
-// Work in Progress
 import Image from "next/image";
-import { ChangeEvent, Suspense, useRef, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 
 const FormImage = ({ courseImage }: { courseImage?: string }) => {
   const [image, setImage] = useState<string | undefined>(courseImage);
@@ -33,9 +32,7 @@ const FormImage = ({ courseImage }: { courseImage?: string }) => {
         type="file"
         id="form-image"
         name="form-image"
-        // defaultValue={courseImage}
         accept=".jpg, .jpeg, .png"
-        // required={courseImage ? false : true}
         onChange={handleFileChange}
         ref={inputFileRef}
         hidden
@@ -53,7 +50,7 @@ const FormImage = ({ courseImage }: { courseImage?: string }) => {
       ) : (
         // Default preview
         <div
-          className="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600"
+          className="relative w-10 h-10 overflow-hidden bg-bg-color rounded-full "
           onClick={handleImageClick}
         >
           <svg

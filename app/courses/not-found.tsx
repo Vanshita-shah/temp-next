@@ -4,7 +4,7 @@ import React from "react";
 const notFound = () => {
   return (
     <>
-      <div className="bg-gray-100 flex items-center justify-center h-[100%]">
+      <div className="bg-bg-color flex items-center justify-center h-[100%]">
         <div className="text-center gap-3 shadow-lg p-10 rounded-lg border-t-4 ">
           <h1 className="text-2xl font-bold mb-4">No Access</h1>
           <Link

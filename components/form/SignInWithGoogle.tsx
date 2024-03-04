@@ -9,7 +9,7 @@ const SignInWithGoogle = () => {
     //SignIn using google provider of NextAuth
     <button
       type="button"
-      className="mt-4 bg-gray-100  px-2 py-2 flex items-center justify-center"
+      className="mt-4 bg-bg-color  px-2 py-2 flex items-center justify-center"
       onClick={async () => {
         const res = await signIn("google");
         if (res) {
@@ -19,7 +19,7 @@ const SignInWithGoogle = () => {
     >
       Login with Google
       <svg
-        className="w-4 h-4 ms-2 fill-gray-600"
+        className="w-4 h-4 ms-2 fill-gray-color"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 18 19"

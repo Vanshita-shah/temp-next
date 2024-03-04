@@ -9,8 +9,8 @@ export default function Layout({
 }) {
   return (
     <>
-      {/* <Filter /> */}
       <Navbar />
+      {/* Parallel route */}
       {modal}
       {children}
     </>

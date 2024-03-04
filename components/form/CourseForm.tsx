@@ -7,23 +7,17 @@ import {
 } from "@/app/utils/actions/courseAction";
 import ErrorMsg from "./ErrorMsg";
 import FormImage from "./FormImage";
-import { ICourse } from "@/types/types";
-import { usePathname, useRouter } from "next/navigation";
+import { CourseFormProps, ICourse } from "@/types/types";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-const CourseForm = ({
-  courseData,
-  isModel,
-}: {
-  courseData?: ICourse;
-  isModel?: boolean;
-}) => {
+const CourseForm = ({ courseData, isModel }: CourseFormProps) => {
+  // extract Id from url
   const pathname = usePathname();
   const parts = pathname.split("/");
   const id = parts[parts.length - 1];
 
-  const router = useRouter();
-
+  // Form action according to add/edit course
   const [state, formAction] = useFormState(
     courseData ? editCourseAction : courseAction,
     { message: "" }

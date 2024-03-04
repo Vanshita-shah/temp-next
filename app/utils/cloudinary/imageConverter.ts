@@ -1,6 +1,7 @@
 import imageType from "image-type";
 import { uploadPhotoToCloudinary, uploadProfileToCloudinary } from "./config";
 
+// Logic to convert File into bas64 string format that cloudinary accepts
 const convertImageToBase64 = async (image: File) => {
   const imageReader = image.stream().getReader();
   const imageDataU8: number[] = [];
@@ -20,6 +21,7 @@ const convertImageToBase64 = async (image: File) => {
   return base64File;
 };
 
+// For user profile photo
 export const convertProfileToURL = async (image: File, name: string) => {
   const base64File = await convertImageToBase64(image);
   //get image url from cloudinary
@@ -28,6 +30,7 @@ export const convertProfileToURL = async (image: File, name: string) => {
   return imageURL;
 };
 
+// For course thumbnail
 export const convertImageToURL = async (image: File, name: string) => {
   const base64File = await convertImageToBase64(image);
   //get image url from cloudinary

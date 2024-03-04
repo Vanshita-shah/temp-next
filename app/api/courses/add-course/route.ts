@@ -19,7 +19,6 @@ export async function POST(req: Request) {
     }
 
     //new course
-
     await Course.create(body);
 
     return NextResponse.json({ message: "course added." }, { status: 201 });
