@@ -1,16 +1,20 @@
 "use server";
-
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
+import { convertProfileToURL } from "../cloudinary/imageConverter";
 
-// validation schema for registration form
+// validation schema for course form
 const registerSchema = zfd.formData({
   name: zfd.text(z.string().min(2, "Too short").max(20, "Too long")),
   email: zfd.text(z.string().email("Invalid email format")),
   password: zfd.text(
-    z.string().min(8, "Password must be at least 8 characters")
+    z.string().min(6, "Password must be at least 6 characters")
   ),
+  profile: z
+    .any()
+    .refine((file) => file.name !== "undefined", "Profile Pic is required.")
+    .refine((file) => file.size <= 5000000, `Max file size is 5MB.`),
 });
 
 export const registerAction = async (
@@ -21,6 +25,7 @@ export const registerAction = async (
     name: formData.get("name"),
     email: formData.get("email"),
     password: formData.get("password"),
+    profile: formData.get("form-image"),
   });
 
   // handling validation errors
@@ -35,38 +40,35 @@ export const registerAction = async (
         formattedErrors[key] = errors[key][0];
       }
     }
+    console.log(formattedErrors);
 
     return formattedErrors;
   }
 
-  /* Work in Progress
-  const profilepic = formData.get("profile") as File;
+  const courseName = formData.get("name") as string;
+  const password = formData.get("password") as string;
+  const confirmPassword = formData.get("confirm-password") as string;
 
-  const imageReader = profilepic.stream().getReader();
-  const imageDataU8: number[] = [];
-
-  while (true) {
-    const { done, value } = await imageReader.read();
-    if (done) break;
-
-    imageDataU8.push(...value);
+  if (confirmPassword !== password) {
+    return { confirm: "Password doesn't match!" };
   }
 
-  const imageBinary = Buffer.from(imageDataU8, "binary");
-  // console.log(imageBinary.toString());
+  //convert profilepic into base64 string
+  const profilepic = formData.get("form-image") as File;
 
-  */
+  const imageURL = await convertProfileToURL(profilepic, courseName);
 
+  //user data
   const body = {
-    name: formData.get("name"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-    // image: imageBinary.toString(),
+    name: formData.get("name") as string,
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+    image: imageURL,
   };
 
   try {
-    // pass formdata as body to register api
-    const res = await fetch("http://localhost:3000/api/register", {
+    // pass user data as body to register api
+    const res = await fetch(`${process.env.BASE_URL}/api/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -77,11 +79,10 @@ export const registerAction = async (
     if (res.status === 403) {
       return { message: "User Already Exists" };
     }
-    if (res.ok) {
-      redirect("/login");
-    }
   } catch (err) {
+    console.log(err);
+
     return { message: "Something went wrong" };
   }
-  return { message: "" };
+  redirect("/login");
 };

@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { connectMongoDB } from "@/lib/mongodb";
+import { redirect } from "next/navigation";
 
 interface SignInParams {
   user: AuthUser;
@@ -19,7 +20,9 @@ export const authOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      authorize: async (
+        credentials: Record<"email" | "password", string> | undefined
+      ): Promise<AuthUser | null> => {
         await connectMongoDB();
         try {
           if (credentials) {
@@ -32,7 +35,7 @@ export const authOptions = {
                 user.password
               );
               if (isPasswordCorrect) {
-                return user;
+                return user as AuthUser;
               } else {
                 throw new Error("invalid password");
               }
@@ -40,10 +43,12 @@ export const authOptions = {
               throw new Error("User doesn't exist");
             }
           }
+          return null;
         } catch (err: unknown) {
           if (err instanceof Error) {
             throw new Error(err.message);
           }
+          return null;
         }
       },
     }),
@@ -57,22 +62,23 @@ export const authOptions = {
 
   callbacks: {
     async signIn({ user, account }: SignInParams) {
-      if (account?.provider == "credentials") {
+      if (account!.provider == "credentials") {
         return true;
       }
 
-      if (account?.provider == "google") {
+      if (account!.provider == "google") {
         await connectMongoDB();
         try {
           const existingUser = await User.findOne({ email: user.email });
           // If user does not exist : New user
           if (!existingUser) {
             const newUser = new User({
+              name: user.name,
               email: user.email,
+              image: user.image,
             });
 
             await newUser.save();
-            return true;
           }
           return true;
         } catch (err) {
@@ -81,22 +87,8 @@ export const authOptions = {
         }
       }
     },
-
-    // managing token, internally used in middleware
-    async jwt({ token, user, session }) {
-      return token;
-    },
-    async session({ token, session, user }) {
-      return session;
-    },
   },
-
-  secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/login",
-  },
-
-  session: {
-    strategy: "jwt",
   },
 };

@@ -19,14 +19,15 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getServerSession();
+  console.log("session,", session);
 
   return (
     <html lang="en">
       <body className={inter.className}>
         {/* Session provider  */}
         <AuthProvider session={session}>
-          <Navbar />
-          <div className="pt-[4rem] h-screen">{children}</div>
+          {!session && <Navbar />}
+          <div className="pt-[4rem] h-screen overflow-auto">{children}</div>
         </AuthProvider>
       </body>
     </html>

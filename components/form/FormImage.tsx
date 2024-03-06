@@ -1,11 +1,10 @@
 "use client";
-
 // Work in Progress
 import Image from "next/image";
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, Suspense, useRef, useState } from "react";
 
-const UserProfile = () => {
-  const [image, setImage] = useState<string | null>(null);
+const FormImage = ({ courseImage }: { courseImage?: string }) => {
+  const [image, setImage] = useState<string | undefined>(courseImage);
   const inputFileRef = useRef<HTMLInputElement>(null);
 
   // Reads the selected file and sets the image data URL
@@ -32,14 +31,16 @@ const UserProfile = () => {
     <>
       <input
         type="file"
-        id="profile"
-        name="profile"
-        required
+        id="form-image"
+        name="form-image"
+        // defaultValue={courseImage}
+        accept=".jpg, .jpeg, .png"
+        // required={courseImage ? false : true}
         onChange={handleFileChange}
         ref={inputFileRef}
         hidden
       />
-      {/* preview of profile */}
+      {/* preview of image */}
       {image ? (
         <Image
           className="inline-block h-[50px] w-[50px] rounded-full ring-2 ring-white"
@@ -69,4 +70,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default FormImage;

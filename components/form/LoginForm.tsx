@@ -11,15 +11,9 @@ const LoginForm = () => {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // get formdata
-    const form = e.target as HTMLFormElement;
-    const emailInput = form.elements[0] as HTMLInputElement;
-    const passwordInput = form.elements[1] as HTMLInputElement;
-
-    const email: string = emailInput.value;
-    const password: string = passwordInput.value;
+  const handleLogin = async (formData: FormData) => {
+    const email: string = formData.get("email") as string;
+    const password: string = formData.get("password") as string;
 
     // SignIn using credentials-provider from nextAuth
     const res = await signIn("credentials", {
@@ -31,13 +25,13 @@ const LoginForm = () => {
     if (res?.error) {
       setError(res.error);
     } else {
+      router.replace("/courses");
       // if login successfull redirect to dashboard page
-      router.push("/dashboard");
     }
   };
 
   return (
-    <form onSubmit={handleLogin} className="flex flex-col ">
+    <form action={handleLogin} className="flex flex-col ">
       <label htmlFor="email" className="mt-3">
         Email <span>*</span>
       </label>

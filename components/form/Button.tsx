@@ -5,12 +5,13 @@ import { useFormStatus } from "react-dom";
 
 const Button = ({ text }: { text: string }) => {
   const { pending } = useFormStatus();
+  console.log(pending);
 
   return (
     <>
       <button
         disabled={pending}
-        className="bg-purple-600 text-white font-bold cursor-pointer px-6 py-2 mt-5 disabled:bg-purple-300 "
+        className="bg-primary hover:bg-primary-dark text-white font-bold cursor-pointer px-6 py-2 mt-5 disabled:bg-primary-light"
       >
         {pending ? "Wait..." : `${text}`}
       </button>
