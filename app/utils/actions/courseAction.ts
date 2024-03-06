@@ -1,68 +1,52 @@
 "use server";
 
 import { getServerSession } from "next-auth";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { convertImageToURL } from "../cloudinary/imageConverter";
 import { getCourse } from "../course-services/CourseServices";
 import { ICourse } from "@/types/types";
-import { zfd } from "zod-form-data";
-import { z } from "zod";
 import { deletePhotoFromCloudinary } from "../cloudinary/config";
+import { courseSchema, editCourseSchema } from "./validations";
+import { formatErrors } from "./formatErrors";
 
-// validation schema for registration form
-const courseSchema = zfd.formData({
-  courseName: zfd.text(z.string().min(5, "Too short").max(20, "Too long")),
-  description: zfd.text(z.string().min(10, "Too short").max(100, "Too long")),
-
-  courseImage: z
-    .any()
-    .refine((file) => file.name !== "undefined", "Course thumnail is required.")
-    .refine((file) => file.size <= 5000000, `Max file size is 5MB.`),
-});
-
+// Add course server action
 export const courseAction = async (
-  prevState: object | { message: string },
+  prevState: Record<string, string> | { message: string },
   formData: FormData
 ) => {
   const session = await getServerSession();
+  const courseName = formData.get("course-name") as string;
+  const description = formData.get("course-description") as string;
+  const prerequisitesString = formData.get("course-prerequisite") as string;
+  const link = formData.get("course-link") as string;
+  const courseImg = formData.get("form-image") as File;
 
   //if session exists
   if (session) {
     const validatedFields = courseSchema.safeParse({
-      courseName: formData.get("course-name") as string,
-      description: formData.get("course-description") as string,
-      courseImage: formData.get("form-image") as File,
+      courseName: courseName,
+      description: description,
+      courseImage: courseImg,
     });
-
-    const courseName = formData.get("course-name") as string;
-    const description = formData.get("course-description") as string;
-    const link = formData.get("course-link") as string;
 
     // handling validation errors
     if (!validatedFields.success) {
       const errors: Record<string, string[]> =
         validatedFields.error.flatten().fieldErrors;
 
-      // Convert errors object to the desired format
-      const formattedErrors: Record<string, string> = {};
-      for (const key in errors) {
-        if (Object.prototype.hasOwnProperty.call(errors, key)) {
-          formattedErrors[key] = errors[key][0];
-        }
-      }
-      console.log(formattedErrors);
+      // Convert errors object to the desired format {fieldName:<message>}
+      const formattedErrors = formatErrors(errors);
 
       return formattedErrors;
     }
 
     const email = session.user.email;
 
-    const prerequisitesString = formData.get("course-prerequisite") as string;
+    // convert prequisitesString into array
     const prerequisites = prerequisitesString.split(",");
 
-    const courseImg = formData.get("form-image") as File;
-
+    // convert course thumbnail into cloudinary url
     const imageURL = await convertImageToURL(courseImg, courseName);
 
     //course data
@@ -89,6 +73,7 @@ export const courseAction = async (
       );
 
       if (res.ok) {
+        // on addition of new course,revalidate courses request
         revalidateTag("courses");
       } else if (res.status === 403) {
         //course name conflict
@@ -96,10 +81,7 @@ export const courseAction = async (
       } else {
         throw new Error("Something went wrong");
       }
-    } catch (err: any) {
-      if (err.message.includes("NEXT_REDIRECT")) {
-        redirect("/courses");
-      }
+    } catch (err) {
       return { message: "Something went wrong" };
     }
     redirect("/courses");
@@ -108,6 +90,7 @@ export const courseAction = async (
   }
 };
 
+// Delete course server action
 export const deleteAction = async (id: string, courseName: string) => {
   try {
     const res = await fetch(
@@ -119,9 +102,11 @@ export const deleteAction = async (id: string, courseName: string) => {
       }
     );
 
+    // delete resources from cloudinary
     deletePhotoFromCloudinary(courseName);
 
     if (res.ok) {
+      // revalidate courses request
       revalidateTag("courses");
       return { message: "Course Deleted Successfully!" };
     }
@@ -131,32 +116,51 @@ export const deleteAction = async (id: string, courseName: string) => {
   return { message: "Something went wrong!" };
 };
 
+// Edit course server action
 export const editCourseAction = async (
-  prevState: object | { message: string },
+  prevState: Record<string, string> | { message: string },
   formData: FormData
 ) => {
   const courseId = formData.get("courseId") as string;
   const courseData = (await getCourse(courseId)) as ICourse;
-
+  const courseName = formData.get("course-name") as string;
+  const description = formData.get("course-description") as string;
+  const link = formData.get("course-link") as string;
   const prerequisitesString = formData.get("course-prerequisite") as string;
   const prerequisites = prerequisitesString.split(",");
-
   const courseImg = formData.get("form-image") as File;
   let imageURL = courseData.courseImage;
+
+  const validatedFields = editCourseSchema.safeParse({
+    courseName: courseName,
+    description: description,
+  });
+
+  // handling validation errors
+  if (!validatedFields.success) {
+    const errors: Record<string, string[]> =
+      validatedFields.error.flatten().fieldErrors;
+
+    // Convert errors object to the desired format {fieldName:<message>}
+    const formattedErrors = formatErrors(errors);
+
+    return formattedErrors;
+  }
+
+  // If user edits courseImg
   if (courseImg.name !== "undefined") {
     imageURL = await convertImageToURL(courseImg, courseData.courseName);
   }
 
   const editedCourseData: Omit<ICourse, "_id" | "creator"> = {
-    courseName: formData.get("course-name") as string,
-    description: formData.get("course-description") as string,
+    courseName: courseName,
+    description: description,
     prerequisites: prerequisites,
-    link: formData.get("course-link") as string,
+    link: link,
     courseImage: imageURL,
   };
 
   // return if there is no update
-
   const isEqual = (editedCourseData: Omit<ICourse, "_id" | "creator">) => {
     const keys = Object.keys(editedCourseData).filter((key) => key !== "_id");
     for (let key of keys) {
@@ -178,7 +182,6 @@ export const editCourseAction = async (
   }
 
   // upadate database
-
   try {
     //send course data as body to post api
     const res = await fetch(`${process.env.BASE_URL}/api/courses/edit-course`, {
@@ -189,6 +192,7 @@ export const editCourseAction = async (
 
       body: JSON.stringify([editedCourseData, courseData._id]),
     });
+
     if (res.ok) {
       revalidateTag("courses");
     } else if (res.status === 403) {
@@ -197,7 +201,7 @@ export const editCourseAction = async (
     } else {
       throw new Error("Something went wrong");
     }
-  } catch (err: any) {
+  } catch (err) {
     return { message: "Something went wrong" };
   }
   redirect("/courses");

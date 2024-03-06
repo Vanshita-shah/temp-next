@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 
+// overriding user interface
 declare module "next-auth" {
   interface User {
     _id: string;

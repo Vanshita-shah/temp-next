@@ -11,6 +11,7 @@ export default function Modal({ children }: { children: React.ReactNode }) {
     router.back();
   }, [router]);
 
+  // Click outside modal to close it
   const onClick: MouseEventHandler = useCallback(
     (e) => {
       if (e.target === overlay.current || e.target === wrapper.current) {
@@ -20,6 +21,7 @@ export default function Modal({ children }: { children: React.ReactNode }) {
     [onDismiss, overlay, wrapper]
   );
 
+  // Press ESC to close modal
   const onKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") onDismiss();

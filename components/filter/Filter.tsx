@@ -8,10 +8,10 @@ const Filter = () => {
   const pathName = usePathname();
   const router = useRouter();
 
+  // remove extra spaces from query and add query to URL
   const searchQueryHandler = () => {
     const trimmedQuery = query.trim();
     const value = trimmedQuery.replace(/\s+/g, " ").toLowerCase();
-    console.log(value);
     if (value == "") router.push(`${pathName}`);
     else router.push(`${pathName}?query=${value}`);
   };
@@ -20,7 +20,7 @@ const Filter = () => {
     <div className="relative drop-shadow-md w-[80%] md:w-[60%] mx-auto py-5 ">
       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
         <svg
-          className="w-4 h-4 text-gray-500 dark:text-gray-400"
+          className="w-4 h-4 text-gray-500 "
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -39,7 +39,7 @@ const Filter = () => {
         id="input-group-search"
         v-model="searchText"
         type="text"
-        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-10 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary outline-none"
+        className="bg-bg-color border border-gray-300 text-gray-dark text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-10 p-2.5  outline-none"
         placeholder="Search by course-name"
         value={query}
         onChange={(e) => setQuery(e.target.value)}

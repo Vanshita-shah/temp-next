@@ -6,8 +6,6 @@ import { IUser } from "@/types/types";
 
 export async function POST(req: Request) {
   try {
-    console.log("register api");
-
     const body: IUser = await req.json();
 
     await connectMongoDB();

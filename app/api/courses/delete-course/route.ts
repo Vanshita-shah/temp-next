@@ -4,9 +4,7 @@ import { ObjectId } from "mongodb";
 import Course from "@/models/course";
 
 export async function DELETE(req: Request) {
-  // const id = "1";
   const id = await req.json();
-  console.log("here is the id", id);
   await connectMongoDB();
 
   try {
@@ -31,5 +29,3 @@ export async function DELETE(req: Request) {
     );
   }
 }
-// 65c5c4d0bf73de1d10f23efa
-// 65c5c4dfbf73de1d10f23efd

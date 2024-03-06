@@ -1,14 +1,16 @@
 import CourseForm from "@/components/form/CourseForm";
-import React from "react";
 import { getCourse } from "@/app/utils/course-services/CourseServices";
-import { ICourse } from "@/types/types";
 import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { PageParams } from "@/types/types";
 
-const page = async ({ params }: { params: { id: string } }) => {
+const EditPage = async ({ params }: PageParams) => {
+  // get courseData based on courseId
   const courseData = await getCourse(params.id);
-  // console.log("here", courseData);
+  const session = await getServerSession();
 
-  if (!courseData) {
+  // user can only edit their own courses
+  if (!courseData || session?.user.email !== courseData.creator) {
     notFound();
   }
 
@@ -22,4 +24,4 @@ const page = async ({ params }: { params: { id: string } }) => {
   );
 };
 
-export default page;
+export default EditPage;

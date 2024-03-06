@@ -4,13 +4,12 @@ import { IUser } from "@/types/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
-  console.log("User api");
-
   const email = request.nextUrl.searchParams.get("email");
+
   try {
     await connectMongoDB();
-    console.log(email);
 
+    // get userdata based on email
     if (email) {
       const data = await User.findOne({ email: email }).lean();
       if (data) {
@@ -19,6 +18,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // get all users
     const data = await User.find().lean();
 
     // Convert ObjectId to string format

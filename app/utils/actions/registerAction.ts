@@ -1,68 +1,51 @@
 "use server";
-import { redirect } from "next/navigation";
-import { z } from "zod";
-import { zfd } from "zod-form-data";
+import { registerSchema } from "./validations";
 import { convertProfileToURL } from "../cloudinary/imageConverter";
-
-// validation schema for course form
-const registerSchema = zfd.formData({
-  name: zfd.text(z.string().min(2, "Too short").max(20, "Too long")),
-  email: zfd.text(z.string().email("Invalid email format")),
-  password: zfd.text(
-    z.string().min(6, "Password must be at least 6 characters")
-  ),
-  profile: z
-    .any()
-    .refine((file) => file.name !== "undefined", "Profile Pic is required.")
-    .refine((file) => file.size <= 5000000, `Max file size is 5MB.`),
-});
+import { revalidateTag } from "next/cache";
+import { redirect } from "next/navigation";
+import { formatErrors } from "./formatErrors";
 
 export const registerAction = async (
-  prevState: object | { message: string },
+  prevState: Record<string, string> | { message: string },
   formData: FormData
 ) => {
+  const userName = formData.get("name") as string;
+  const email = formData.get("email") as string;
+  const profilepic = formData.get("form-image") as File;
+  const password = formData.get("password") as string;
+  const confirmPassword = formData.get("confirm-password") as string;
+
+  // validating fields according to zod schema
   const validatedFields = registerSchema.safeParse({
-    name: formData.get("name"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-    profile: formData.get("form-image"),
+    name: userName,
+    email: email,
+    password: password,
+    profile: profilepic,
   });
 
   // handling validation errors
   if (!validatedFields.success) {
     const errors: Record<string, string[]> =
       validatedFields.error.flatten().fieldErrors;
-
-    // Convert errors object to the desired format
-    const formattedErrors: Record<string, string> = {};
-    for (const key in errors) {
-      if (Object.prototype.hasOwnProperty.call(errors, key)) {
-        formattedErrors[key] = errors[key][0];
-      }
-    }
-    console.log(formattedErrors);
+    // Convert errors object to the desired format {fieldName:<message>}
+    const formattedErrors = formatErrors(errors);
 
     return formattedErrors;
   }
 
-  const courseName = formData.get("name") as string;
-  const password = formData.get("password") as string;
-  const confirmPassword = formData.get("confirm-password") as string;
-
+  // If passwords doesn't match
   if (confirmPassword !== password) {
     return { confirm: "Password doesn't match!" };
   }
 
-  //convert profilepic into base64 string
-  const profilepic = formData.get("form-image") as File;
-
-  const imageURL = await convertProfileToURL(profilepic, courseName);
+  //convert profilepic file into cloudinary url
+  const imageURL = await convertProfileToURL(profilepic, userName);
 
   //user data
   const body = {
-    name: formData.get("name") as string,
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
+    name: userName,
+    email: email,
+    password: password,
     image: imageURL,
   };
 
@@ -76,13 +59,16 @@ export const registerAction = async (
       body: JSON.stringify(body),
     });
 
+    if (res.ok) {
+      // On new registeration, revalidate request having tag users
+      revalidateTag("users");
+    }
+
     if (res.status === 403) {
-      return { message: "User Already Exists" };
+      return { message: "User Already Exists!" };
     }
   } catch (err) {
-    console.log(err);
-
-    return { message: "Something went wrong" };
+    return { message: "Something went wrong!" };
   }
   redirect("/login");
 };

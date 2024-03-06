@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   try {
     await connectMongoDB();
     if (email) {
-      console.log("email is", email, "query is ", query);
+      // get current user's courses based on query
       if (query) {
         const courses = await Course.find({
           $and: [
@@ -20,15 +20,19 @@ export async function GET(request: NextRequest) {
         });
         return NextResponse.json({ courses }, { status: 200 });
       }
+
+      // get current user's all courses
       const courses = await Course.find({ creator: email });
       return NextResponse.json({ courses }, { status: 200 });
     }
 
+    // get course data based on courseId
     if (id) {
       const course = await Course.find({ _id: new ObjectId(id) });
       return NextResponse.json({ course }, { status: 200 });
     }
 
+    // get all courses based on query
     if (query) {
       const courses = await Course.find({
         courseName: { $regex: query, $options: "i" },
@@ -36,11 +40,12 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({ courses }, { status: 200 });
     }
+
+    // get all courses of all users
     const courses = await Course.find();
 
     return NextResponse.json({ courses }, { status: 200 });
   } catch (error) {
-    console.error("Error retrieving courses:", error);
     return NextResponse.json(
       { message: "An error occurred while adding the course.", error },
       { status: 500 }

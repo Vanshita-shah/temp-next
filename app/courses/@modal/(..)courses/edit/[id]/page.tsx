@@ -1,14 +1,17 @@
-import CourseForm from "@/components/form/CourseForm";
-import Modal from "@/components/modal/modal";
-import React from "react";
+import { getServerSession } from "next-auth";
 import { getCourse } from "@/app/utils/course-services/CourseServices";
 import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
+import { PageParams } from "@/types/types";
+import Modal from "@/components/modal/modal";
+import CourseForm from "@/components/form/CourseForm";
 
-const page = async ({ params }: { params: { id: string } }) => {
+// Intercepting route for edit modal
+const page = async ({ params }: PageParams) => {
   const courseData = await getCourse(params.id);
+  const session = await getServerSession();
 
-  if (!courseData) {
+  // user can only edit their own courses
+  if (!courseData || session?.user.email !== courseData.creator) {
     notFound();
   }
 
