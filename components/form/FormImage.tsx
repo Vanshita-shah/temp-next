@@ -14,7 +14,6 @@ const FormImage = ({ courseImage }: { courseImage?: string }) => {
   // Reads the selected file and sets the image data URL
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    console.log(file);
 
     setOpenModal(true);
 

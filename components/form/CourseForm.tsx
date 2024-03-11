@@ -7,7 +7,7 @@ import {
 } from "@/app/utils/actions/courseAction";
 import ErrorMsg from "./ErrorMsg";
 import FormImage from "./FormImage";
-import { CourseFormProps, ICourse } from "@/types/types";
+import { CourseFormProps } from "@/types/types";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 

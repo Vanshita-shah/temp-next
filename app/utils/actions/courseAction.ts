@@ -3,7 +3,7 @@
 import { getServerSession } from "next-auth";
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import { convertImageToURL } from "../cloudinary/imageConverter";
+import { convertImageToURL, dataURLtoFile } from "../cloudinary/imageConverter";
 import { getCourse } from "../course-services/CourseServices";
 import { ICourse } from "@/types/types";
 import { deletePhotoFromCloudinary } from "../cloudinary/config";
@@ -20,14 +20,16 @@ export const courseAction = async (
   const description = formData.get("course-description") as string;
   const prerequisitesString = formData.get("course-prerequisite") as string;
   const link = formData.get("course-link") as string;
-  const courseImg = formData.get("form-image") as File;
+  const croppedCourseImg = formData.get("form-cropped-image") as string;
 
+  //Usage example:
+  const courseImgFile = dataURLtoFile(croppedCourseImg, `${courseName}.png`);
   //if session exists
   if (session) {
     const validatedFields = courseSchema.safeParse({
       courseName: courseName,
       description: description,
-      courseImage: courseImg,
+      courseImage: courseImgFile,
     });
 
     // handling validation errors
@@ -47,7 +49,8 @@ export const courseAction = async (
     const prerequisites = prerequisitesString.split(",");
 
     // convert course thumbnail into cloudinary url
-    const imageURL = await convertImageToURL(courseImg, courseName);
+    // const imageURL = await convertImageToURL(courseImg, courseName);
+    const imageURL = await convertImageToURL(croppedCourseImg, courseName);
 
     //course data
     const body = {
@@ -128,7 +131,7 @@ export const editCourseAction = async (
   const link = formData.get("course-link") as string;
   const prerequisitesString = formData.get("course-prerequisite") as string;
   const prerequisites = prerequisitesString.split(",");
-  const courseImg = formData.get("form-image") as File;
+  const courseImg = formData.get("form-cropped-image") as string;
   let imageURL = courseData.courseImage;
 
   const validatedFields = editCourseSchema.safeParse({
@@ -148,7 +151,7 @@ export const editCourseAction = async (
   }
 
   // If user edits courseImg
-  if (courseImg.name !== "undefined") {
+  if (courseImg) {
     imageURL = await convertImageToURL(courseImg, courseData.courseName);
   }
 
