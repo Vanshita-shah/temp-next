@@ -1,5 +1,6 @@
 import imageType from "image-type";
 import { uploadPhotoToCloudinary, uploadProfileToCloudinary } from "./config";
+import { File } from "buffer";
 
 // Logic to convert File into bas64 string format that cloudinary accepts
 const convertImageToBase64 = async (image: File) => {
@@ -21,20 +22,34 @@ const convertImageToBase64 = async (image: File) => {
   return base64File;
 };
 
+// Converting Base64 URL string into File  object
+export const dataURLtoFile = (dataurl: string, filename: string) => {
+  if (!dataurl) {
+    return new File([], "undefined", { type: undefined });
+  }
+  let arr = dataurl.split(","),
+    mime = arr[0].match(/:(.*?);/)![1],
+    bstr = atob(arr[arr.length - 1]),
+    n = bstr.length,
+    u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+};
+
 // For user profile photo
-export const convertProfileToURL = async (image: File, name: string) => {
-  const base64File = await convertImageToBase64(image);
+export const convertProfileToURL = async (base64: string, name: string) => {
   //get image url from cloudinary
-  const imageURL = await uploadProfileToCloudinary(base64File, name);
+  const imageURL = await uploadProfileToCloudinary(base64, name);
 
   return imageURL;
 };
 
 // For course thumbnail
-export const convertImageToURL = async (image: File, name: string) => {
-  const base64File = await convertImageToBase64(image);
+export const convertImageToURL = async (base64: string, name: string) => {
   //get image url from cloudinary
-  const imageURL = await uploadPhotoToCloudinary(base64File, name);
+  const imageURL = await uploadPhotoToCloudinary(base64, name);
 
   return imageURL;
 };
