@@ -1,14 +1,22 @@
 "use client";
 import Image from "next/image";
 import { ChangeEvent, useRef, useState } from "react";
+import "cropperjs/dist/cropper.css";
+import ImageCropModal from "./ImageCropModal";
 
 const FormImage = ({ courseImage }: { courseImage?: string }) => {
   const [image, setImage] = useState<string | undefined>(courseImage);
   const inputFileRef = useRef<HTMLInputElement>(null);
+  const croppedFileRef = useRef<HTMLInputElement>(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [cropData, setCropData] = useState<string | undefined>("");
 
   // Reads the selected file and sets the image data URL
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    console.log(file);
+
+    setOpenModal(true);
 
     if (file) {
       const reader = new FileReader();
@@ -37,11 +45,20 @@ const FormImage = ({ courseImage }: { courseImage?: string }) => {
         ref={inputFileRef}
         hidden
       />
+
+      {/* Base64 of croppedImage */}
+      <input
+        type="text"
+        id="form-cropped-image"
+        name="form-cropped-image"
+        ref={croppedFileRef}
+        hidden
+      />
       {/* preview of image */}
       {image ? (
         <Image
           className="inline-block h-[50px] w-[50px] rounded-full ring-2 ring-white"
-          src={image}
+          src={cropData || image}
           onClick={handleImageClick}
           alt=""
           width={50}
@@ -62,6 +79,16 @@ const FormImage = ({ courseImage }: { courseImage?: string }) => {
             <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
           </svg>
         </div>
+      )}
+
+      {/* Image crop modal */}
+      {openModal && image && (
+        <ImageCropModal
+          image={image}
+          croppedFileRef={croppedFileRef}
+          setOpenModal={setOpenModal}
+          setCropData={setCropData}
+        />
       )}
     </>
   );
