@@ -1,6 +1,9 @@
 "use server";
 import { registerSchema } from "./validations";
-import { convertProfileToURL } from "../cloudinary/imageConverter";
+import {
+  convertProfileToURL,
+  dataURLtoFile,
+} from "../cloudinary/imageConverter";
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { formatErrors } from "./formatErrors";
@@ -11,10 +14,11 @@ export const registerAction = async (
 ) => {
   const userName = formData.get("name") as string;
   const email = formData.get("email") as string;
-  const profilepic = formData.get("form-image") as File;
+  const croppedImage = formData.get("form-cropped-image") as string;
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirm-password") as string;
 
+  const profilepic = dataURLtoFile(croppedImage, `${userName}.png`);
   // validating fields according to zod schema
   const validatedFields = registerSchema.safeParse({
     name: userName,
@@ -38,18 +42,18 @@ export const registerAction = async (
     return { confirm: "Password doesn't match!" };
   }
 
-  //convert profilepic file into cloudinary url
-  const imageURL = await convertProfileToURL(profilepic, userName);
-
-  //user data
-  const body = {
-    name: userName,
-    email: email,
-    password: password,
-    image: imageURL,
-  };
-
   try {
+    //convert profilepic file into cloudinary url
+    const imageURL = await convertProfileToURL(croppedImage, userName);
+
+    //user data
+    const body = {
+      name: userName,
+      email: email,
+      password: password,
+      image: imageURL,
+    };
+
     // pass user data as body to register api
     const res = await fetch(`${process.env.BASE_URL}/api/register`, {
       method: "POST",

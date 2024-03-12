@@ -1,5 +1,5 @@
 import { Session } from "next-auth";
-import { Dispatch, ReactNode, SetStateAction } from "react";
+import { Dispatch, ReactNode, RefObject, SetStateAction } from "react";
 
 // interface for course model
 export interface ICourse {
@@ -75,6 +75,13 @@ export interface DeletePopUpProps {
   id: string;
   courseName: string;
   setShowPopUp: Dispatch<SetStateAction<boolean>>;
+}
+
+export interface ImageCropModalProps {
+  image: string;
+  setOpenModal: Dispatch<SetStateAction<boolean>>;
+  croppedFileRef: RefObject<HTMLInputElement>;
+  setCropData: Dispatch<SetStateAction<string | undefined>>;
 }
 
 /*---------------------------- API response type ---------------------------- */

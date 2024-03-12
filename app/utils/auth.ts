@@ -81,8 +81,7 @@ export const authOptions = {
           }
           return true;
         } catch (err) {
-          console.log("Error saving user", err);
-          return false;
+          throw new Error("Error saving user");
         }
       }
     },
