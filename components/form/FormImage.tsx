@@ -55,14 +55,17 @@ const FormImage = ({ courseImage }: { courseImage?: string }) => {
       />
       {/* preview of image */}
       {image ? (
-        <Image
-          className="inline-block h-[50px] w-[50px] rounded-full ring-2 ring-white"
-          src={cropData || image}
-          onClick={handleImageClick}
-          alt=""
-          width={50}
-          height={50}
-        />
+        <>
+          <div className="h-[50px] w-[50px] relative">
+            <Image
+              className="inline-block object-contain rounded-full ring-2 ring-white"
+              src={cropData || image}
+              onClick={handleImageClick}
+              alt=""
+              fill
+            />
+          </div>
+        </>
       ) : (
         // Default preview
         <div

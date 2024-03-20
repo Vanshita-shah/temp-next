@@ -10,13 +10,12 @@ const CourseData = ({
 }) => {
   return (
     <>
-      <div className="w-[100%] h-[150px] sm:h-[250px] m-auto">
+      <div className="w-[100%] h-[150px] sm:h-[250px] m-auto relative">
         <Image
-          className="w-[100%] h-[100%] object-contain m-auto"
+          className=" object-contain m-auto"
           src={courseData.courseImage}
           alt="course thumbnail"
-          width={400}
-          height={150}
+          fill
         />
       </div>
       <div className={isModal ? "p-5 max-h-[50%] overflow-auto" : ""}>

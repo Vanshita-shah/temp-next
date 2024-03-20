@@ -17,8 +17,6 @@ const ImageCropModal = ({
         .getCroppedCanvas()
         .toDataURL();
 
-      console.log(croppedImage);
-
       //setting cropped data, input ref's value and closing the modal
       setCropData(croppedImage);
       if (croppedFileRef.current) croppedFileRef.current.value = croppedImage;
@@ -32,14 +30,16 @@ const ImageCropModal = ({
         <div className="bg-white p-5 max-w-[300px]  sm:min-w-[350px] h-[300px]  ">
           <Cropper
             src={image}
-            className="w-[100%] h-[60%] flex justify-center items-center"
-            style={{ width: "100%" }}
+            className="w-[100%] h-[60%] flex justify-center object-cover items-center"
             // Cropper.js options
             initialAspectRatio={1}
+            minCropBoxHeight={50}
+            minCropBoxWidth={50}
             zoomable={false}
             guides={false}
             background={false}
             ref={cropperRef}
+            viewMode={1}
           />
 
           <button
