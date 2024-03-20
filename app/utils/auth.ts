@@ -1,5 +1,5 @@
 import User from "@/models/user";
-import { Account, User as AuthUser } from "next-auth";
+import { Account, User as AuthUser, SessionStrategy } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
@@ -7,7 +7,7 @@ import { connectMongoDB } from "@/lib/mongodb";
 
 interface SignInParams {
   user: AuthUser;
-  account: Account;
+  account: Account | null;
 }
 
 export const authOptions = {
@@ -67,6 +67,7 @@ export const authOptions = {
 
       if (account!.provider == "google") {
         await connectMongoDB();
+
         try {
           const existingUser = await User.findOne({ email: user.email });
           // If user does not exist : New user
@@ -84,8 +85,23 @@ export const authOptions = {
           throw new Error("Error saving user");
         }
       }
+
+      return false;
+    },
+
+    // Work In Progress
+    async jwt({ token }: any) {
+      return token;
+    },
+    async session({ session, token }: any) {
+      return session;
     },
   },
+
+  session: {
+    strategy: "jwt" as SessionStrategy,
+  },
+  secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/login",
   },
