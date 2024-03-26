@@ -4,11 +4,12 @@ import { notFound } from "next/navigation";
 import { PageParams } from "@/types/types";
 import Modal from "@/components/modal/modal";
 import CourseForm from "@/components/form/CourseForm";
+import { authOptions } from "@/app/utils/auth";
 
 // Intercepting route for edit modal
 const page = async ({ params }: PageParams) => {
   const courseData = await getCourse(params.id);
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   // user can only edit their own courses
   if (!courseData || session?.user.email !== courseData.creator) {

@@ -1,3 +1,4 @@
+import { authOptions } from "@/app/utils/auth";
 import { getMyCourses } from "@/app/utils/course-services/CourseServices";
 import { getUserID } from "@/app/utils/user-services/getUser";
 import Courses from "@/components/courses/Courses";
@@ -10,7 +11,7 @@ import { notFound } from "next/navigation";
 import React from "react";
 
 const MyCourses = async ({ params, searchParams }: MyCoursesPageProps) => {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   const email = session?.user.email;
   const userId = await getUserID(email!);
   const courses = await getMyCourses(email, searchParams?.query);

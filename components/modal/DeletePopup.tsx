@@ -4,6 +4,7 @@ import Loader from "../loader/Loader";
 import { toast } from "react-toastify";
 import { DeletePopUpProps } from "@/types/types";
 import { useState } from "react";
+import ModalLayout from "./ModalLayout";
 
 const DeletePopup = ({ id, courseName, setShowPopUp }: DeletePopUpProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +25,7 @@ const DeletePopup = ({ id, courseName, setShowPopUp }: DeletePopUpProps) => {
   };
 
   return (
-    <div className="fixed z-10 left-0 right-0 top-0 bottom-0 mx-auto bg-black/60 ">
+    <ModalLayout>
       <div className="flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full inset-0 ">
         {!isLoading ? (
           <div className="relative p-4 w-full max-w-md h-auto">
@@ -76,7 +77,7 @@ const DeletePopup = ({ id, courseName, setShowPopUp }: DeletePopUpProps) => {
           <Loader />
         )}
       </div>
-    </div>
+    </ModalLayout>
   );
 };
 

@@ -1,4 +1,5 @@
-import { Session } from "next-auth";
+import { User as AuthUser, Account, Session } from "next-auth";
+import { JWT } from "next-auth/jwt";
 import { Dispatch, ReactNode, RefObject, SetStateAction } from "react";
 
 // interface for course model
@@ -91,4 +92,26 @@ export interface CoursesAPIResponse {
 
 export interface CourseAPIResponse {
   course: ICourse[];
+}
+
+/*---------------------------- NextAuth session,callbacks and JWT ---------------------------- */
+export interface SignInParams {
+  user: AuthUser;
+  account: Account | null;
+}
+
+export interface JWTCallbackParams {
+  token: JWT;
+  user: AuthUser;
+  account: Account | null;
+}
+
+export interface SessionCallbackParams {
+  session: Session;
+  token: JWT;
+}
+
+export interface JWTPayload {
+  id: string;
+  email: string;
 }

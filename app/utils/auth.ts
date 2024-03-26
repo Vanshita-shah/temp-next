@@ -1,14 +1,16 @@
 import User from "@/models/user";
-import { Account, User as AuthUser, SessionStrategy } from "next-auth";
+import { User as AuthUser, SessionStrategy } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import bcrypt from "bcryptjs";
 import { connectMongoDB } from "@/lib/mongodb";
-
-interface SignInParams {
-  user: AuthUser;
-  account: Account | null;
-}
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { JWT } from "next-auth/jwt";
+import {
+  JWTCallbackParams,
+  SessionCallbackParams,
+  SignInParams,
+} from "@/types/types";
 
 export const authOptions = {
   providers: [
@@ -19,20 +21,24 @@ export const authOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
+
       authorize: async (
         credentials: Record<"email" | "password", string> | undefined
       ): Promise<AuthUser | null> => {
         await connectMongoDB();
+
         try {
           if (credentials) {
             // Check if user exists
             const user = await User.findOne({ email: credentials.email });
+
             if (user && user.password) {
               // Check if password is correct
               const isPasswordCorrect = await bcrypt.compare(
                 credentials.password,
                 user.password
               );
+
               if (isPasswordCorrect) {
                 return user as AuthUser;
               } else {
@@ -61,11 +67,11 @@ export const authOptions = {
 
   callbacks: {
     async signIn({ user, account }: SignInParams) {
-      if (account!.provider == "credentials") {
+      if (account && account.provider == "credentials") {
         return true;
       }
 
-      if (account!.provider == "google") {
+      if (account && account.provider == "google") {
         await connectMongoDB();
 
         try {
@@ -89,11 +95,41 @@ export const authOptions = {
       return false;
     },
 
-    // Work In Progress
-    async jwt({ token }: any) {
-      return token;
+    async jwt({
+      token,
+      user,
+      account,
+    }: JWTCallbackParams): Promise<JWT | null> {
+      if (Date.now() < token.accessTokenExpires - 100000 || 0) {
+        return token;
+      }
+      if (account) {
+        // JWT payload with user information
+        const jwtPayload = {
+          id: user.id,
+          email: user.email,
+        };
+
+        // Generate the JWT Token using NEXTAUTH_SECRET for signing
+        const jwtToken = jwt.sign(jwtPayload, process.env.NEXTAUTH_SECRET!);
+
+        return {
+          accessToken: jwtToken,
+          accessTokenExpires: Date.now() + 3600000, //1hr
+          user,
+        };
+      } else {
+        return null;
+      }
     },
-    async session({ session, token }: any) {
+
+    //Session callback
+    async session({ session, token }: SessionCallbackParams) {
+      if (session && token) {
+        session.user = token.user;
+        session.accessToken = token.accessToken;
+        session.expire_time = token.accessTokenExpires;
+      }
       return session;
     },
   },
@@ -101,7 +137,9 @@ export const authOptions = {
   session: {
     strategy: "jwt" as SessionStrategy,
   },
+
   secret: process.env.NEXTAUTH_SECRET,
+
   pages: {
     signIn: "/login",
   },
