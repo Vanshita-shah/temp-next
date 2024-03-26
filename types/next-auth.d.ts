@@ -10,3 +10,12 @@ declare module "next-auth" {
     image: string;
   }
 }
+
+// overriding JWT interface
+declare module "next-auth/jwt" {
+  interface JWT {
+    user: AuthUser;
+    accessToken: string;
+    accessTokenExpires: number;
+  }
+}

@@ -2,9 +2,10 @@ import Image from "next/image";
 import { getServerSession } from "next-auth";
 import CourseCardActions from "./CourseCardActions";
 import { CourseCardProps } from "@/types/types";
+import { authOptions } from "@/app/utils/auth";
 
 const CourseCard = async ({ course, users }: CourseCardProps) => {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   const currentUser = session?.user.email;
 
   // filter course creator's data

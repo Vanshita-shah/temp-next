@@ -1,15 +1,6 @@
-import { getServerSession } from "next-auth";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 const page = async () => {
-  const session = await getServerSession();
-
-  //Redirect Authenticated user to dashboard page
-  if (session) {
-    redirect("/courses");
-  }
-
   return (
     <>
       <div className="bg-bg-color flex items-center justify-center h-[100%]">

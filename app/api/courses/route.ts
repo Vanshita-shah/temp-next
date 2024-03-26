@@ -1,17 +1,47 @@
 import { connectMongoDB } from "@/lib/mongodb";
 import Course from "@/models/course";
 import { ObjectId } from "mongodb";
+import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
+import { JWTPayload } from "@/types/types";
 
 export async function GET(request: NextRequest) {
   const email = request.nextUrl.searchParams.get("email");
   const id = request.nextUrl.searchParams.get("id");
   const query = request.nextUrl.searchParams.get("query");
+
+  //Check for bearer token
+  const headersList = headers();
+  const authHeader = headersList.get("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return NextResponse.json(
+      { message: "Unauthorized Access!" },
+      { status: 401 }
+    );
+  }
+
+  const token = authHeader.split(" ")[1];
+
   try {
+    //decode token and get jwt payload
+    const decoded = jwt.verify(
+      token,
+      process.env.NEXTAUTH_SECRET!
+    ) as JWTPayload;
+
     await connectMongoDB();
+
     if (email) {
-      // get current user's courses based on query
+      if (email !== decoded.email.toString()) {
+        return NextResponse.json(
+          { message: "Unauthorized Access!" },
+          { status: 401 }
+        );
+      }
+
       if (query) {
+        // get current user's courses based on query
         const courses = await Course.find({
           $and: [
             { creator: email }, // Condition 1: Match documents where the creator field equals the provided email
@@ -47,8 +77,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ courses }, { status: 200 });
   } catch (error) {
     return NextResponse.json(
-      { message: "An error occurred while adding the course.", error },
-      { status: 500 }
+      { message: (error as { message: string }).message },
+      { status: 404 }
     );
   }
 }

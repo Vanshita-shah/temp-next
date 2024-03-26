@@ -9,13 +9,14 @@ import { ICourse } from "@/types/types";
 import { deletePhotoFromCloudinary } from "../cloudinary/config";
 import { courseSchema, editCourseSchema } from "./validations";
 import { formatErrors } from "./formatErrors";
+import { authOptions } from "../auth";
 
 // Add course server action
 export const courseAction = async (
   prevState: Record<string, string> | { message: string },
   formData: FormData
 ) => {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   const courseName = formData.get("course-name") as string;
   const description = formData.get("course-description") as string;
   const prerequisitesString = formData.get("course-prerequisite") as string;
@@ -49,7 +50,6 @@ export const courseAction = async (
     const prerequisites = prerequisitesString.split(",");
 
     // convert course thumbnail into cloudinary url
-    // const imageURL = await convertImageToURL(courseImg, courseName);
     const imageURL = await convertImageToURL(croppedCourseImg, courseName);
 
     //course data
@@ -63,6 +63,9 @@ export const courseAction = async (
     };
 
     try {
+      const session = await getServerSession(authOptions);
+      const accessToken = session?.accessToken;
+
       //send course data as body to post api
       const res = await fetch(
         `${process.env.BASE_URL}/api/courses/add-course`,
@@ -70,6 +73,7 @@ export const courseAction = async (
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify(body),
         }
@@ -96,12 +100,18 @@ export const courseAction = async (
 // Delete course server action
 export const deleteAction = async (id: string, courseName: string) => {
   try {
+    const session = await getServerSession(authOptions);
+    const accessToken = session?.accessToken;
+
     const res = await fetch(
       `${process.env.BASE_URL}/api/courses/delete-course`,
       {
         // Using method DELETE to delete data
         method: "DELETE",
-        body: JSON.stringify(id),
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ id: id }),
       }
     );
 
@@ -186,11 +196,14 @@ export const editCourseAction = async (
 
   // upadate database
   try {
+    const session = await getServerSession(authOptions);
+    const accessToken = session?.accessToken;
     //send course data as body to post api
     const res = await fetch(`${process.env.BASE_URL}/api/courses/edit-course`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
 
       body: JSON.stringify([editedCourseData, courseData._id]),
