@@ -1,37 +1,22 @@
 import { connectMongoDB } from "@/lib/mongodb";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import Course from "@/models/course";
-import { ICourse, JWTPayload } from "@/types/types";
-import { headers } from "next/headers";
-import jwt from "jsonwebtoken";
+import { ICourse } from "@/types/types";
 
-export async function POST(req: Request) {
+import { verifyToken } from "../../tokenHandler";
+
+export async function POST(request: NextRequest) {
   try {
-    const body: ICourse = await req.json();
+    const body: ICourse = await request.json();
 
-    //Check for bearer token
-    const headersList = headers();
-    const authHeader = headersList.get("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json(
-        { message: "Unauthorized Access!" },
-        { status: 401 }
-      );
-    }
-
-    //decode token and get Jwt payload
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(
-      token,
-      process.env.NEXTAUTH_SECRET!
-    ) as JWTPayload;
+    const decoded = await verifyToken(request);
 
     await connectMongoDB();
 
     const course = await Course.findOne({ courseName: body.courseName });
 
     //Only authorized user can perform this action
-    if (body.creator !== decoded.email.toString()) {
+    if (!decoded.email || body.creator !== decoded.email.toString()) {
       return NextResponse.json(
         { message: "Unauthorized Access!" },
         { status: 401 }
@@ -53,7 +38,7 @@ export async function POST(req: Request) {
   } catch (error) {
     return NextResponse.json(
       { message: (error as { message: string }).message },
-      { status: 404 }
+      { status: 401 }
     );
   }
 }

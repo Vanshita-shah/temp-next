@@ -10,6 +10,7 @@ import { deletePhotoFromCloudinary } from "../cloudinary/config";
 import { courseSchema, editCourseSchema } from "./validations";
 import { formatErrors } from "./formatErrors";
 import { authOptions } from "../auth";
+import { getAccessToken, getProvider } from "../sessionServices";
 
 // Add course server action
 export const courseAction = async (
@@ -63,8 +64,8 @@ export const courseAction = async (
     };
 
     try {
-      const session = await getServerSession(authOptions);
-      const accessToken = session?.accessToken;
+      const accessToken = await getAccessToken();
+      const provider = await getProvider();
 
       //send course data as body to post api
       const res = await fetch(
@@ -74,6 +75,7 @@ export const courseAction = async (
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
+            Provider: `${provider}`,
           },
           body: JSON.stringify(body),
         }
@@ -100,8 +102,8 @@ export const courseAction = async (
 // Delete course server action
 export const deleteAction = async (id: string, courseName: string) => {
   try {
-    const session = await getServerSession(authOptions);
-    const accessToken = session?.accessToken;
+    const accessToken = await getAccessToken();
+    const provider = await getProvider();
 
     const res = await fetch(
       `${process.env.BASE_URL}/api/courses/delete-course`,
@@ -110,6 +112,7 @@ export const deleteAction = async (id: string, courseName: string) => {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          Provider: `${provider}`,
         },
         body: JSON.stringify({ id: id }),
       }
@@ -196,14 +199,16 @@ export const editCourseAction = async (
 
   // upadate database
   try {
-    const session = await getServerSession(authOptions);
-    const accessToken = session?.accessToken;
+    const accessToken = await getAccessToken();
+    const provider = await getProvider();
+
     //send course data as body to post api
     const res = await fetch(`${process.env.BASE_URL}/api/courses/edit-course`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
+        Provider: `${provider}`,
       },
 
       body: JSON.stringify([editedCourseData, courseData._id]),

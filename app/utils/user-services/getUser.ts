@@ -1,16 +1,16 @@
-import { CoursesAPIResponse, IUser } from "@/types/types";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth";
+import { IUser } from "@/types/types";
+import { getAccessToken, getProvider } from "../sessionServices";
 
 // get all users data array
 export const getAllUsers = async () => {
   try {
-    const session = await getServerSession(authOptions);
-    const accessToken = session?.accessToken;
+    const accessToken = await getAccessToken();
+    const provider = await getProvider();
 
     const res = await fetch(`${process.env.BASE_URL}/api/users`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
+        Provider: `${provider}`,
       },
       next: { tags: ["users"] },
     });
@@ -24,14 +24,16 @@ export const getAllUsers = async () => {
 
 // get userdata based on email
 export const getUser = async (email: string) => {
-  const session = await getServerSession(authOptions);
-  const accessToken = session?.accessToken;
+  const accessToken = await getAccessToken();
+  const provider = await getProvider();
+
   try {
     const res = await fetch(
       `${process.env.BASE_URL}/api/users?email=${email}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          Provider: `${provider}`,
         },
       }
     );
@@ -50,7 +52,7 @@ export const getUserID = async (email: string) => {
       const userData = await getUser(email);
       return userData._id;
     }
-  } catch (err) {
-    throw new Error("Something went wrong!");
+  } catch (err: any) {
+    throw new Error(err.message as string);
   }
 };

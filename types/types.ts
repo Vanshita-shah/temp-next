@@ -21,6 +21,7 @@ export interface IUser {
   email: string;
   password?: string;
   image: string;
+  provider: string;
 }
 
 //Session provider props
@@ -114,4 +115,11 @@ export interface SessionCallbackParams {
 export interface JWTPayload {
   id: string;
   email: string;
+}
+
+export interface GithubEmailInfo {
+  email: string;
+  primary: boolean;
+  verified: boolean;
+  visibility: "public" | null;
 }

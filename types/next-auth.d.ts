@@ -1,5 +1,15 @@
 import NextAuth from "next-auth";
 
+declare module "next-auth" {
+  // override session interface
+  interface Session {
+    user: User;
+    accessToken: string;
+    provider: "credentials" | "google" | "github";
+    expire_time: number;
+  }
+}
+
 // overriding user interface
 declare module "next-auth" {
   interface User {
@@ -17,5 +27,6 @@ declare module "next-auth/jwt" {
     user: AuthUser;
     accessToken: string;
     accessTokenExpires: number;
+    provider: "credentials" | "google" | "github";
   }
 }
