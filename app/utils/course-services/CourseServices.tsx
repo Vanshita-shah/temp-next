@@ -1,16 +1,18 @@
 import { CourseAPIResponse, CoursesAPIResponse } from "@/types/types";
 import { getServerSession } from "next-auth";
-import { headers } from "next/headers";
 import { authOptions } from "../auth";
+import { getAccessToken, getProvider } from "../sessionServices";
 
 // get coursedata based on id
 export const getCourse = async (id: string) => {
   try {
-    const session = await getServerSession(authOptions);
-    const accessToken = session?.accessToken;
+    const accessToken = await getAccessToken();
+    const provider = await getProvider();
+
     const res = await fetch(`${process.env.BASE_URL}/api/courses?id=${id}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
+        Provider: `${provider}`,
       },
       next: { tags: ["course"] },
     });
@@ -27,8 +29,9 @@ export const getCourse = async (id: string) => {
 
 // get courses based on query
 export const getCourses = async (query?: string) => {
-  const session = await getServerSession(authOptions);
-  const accessToken = session?.accessToken;
+  const accessToken = await getAccessToken();
+  const provider = await getProvider();
+
   // if query doesn't exist, get all courses
   const url = query ? `api/courses?query=${query}` : "api/courses";
 
@@ -36,6 +39,7 @@ export const getCourses = async (query?: string) => {
     const res = await fetch(`${process.env.BASE_URL}/${url}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
+        Provider: `${provider}`,
       },
       next: { tags: ["courses"] },
     });
@@ -50,8 +54,9 @@ export const getCourses = async (query?: string) => {
 
 // get current user's courses or courses based on query
 export const getMyCourses = async (email?: string, query?: string) => {
-  const session = await getServerSession(authOptions);
-  const accessToken = session?.accessToken;
+  const accessToken = await getAccessToken();
+  const provider = await getProvider();
+
   try {
     const url = query ? `query=${query}` : "";
 
@@ -61,6 +66,7 @@ export const getMyCourses = async (email?: string, query?: string) => {
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
+            Provider: `${provider}`,
           },
         }
       );

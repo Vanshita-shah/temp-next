@@ -5,35 +5,23 @@ import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { JWTPayload } from "@/types/types";
+import { OAuth2Client } from "google-auth-library";
+import { verifyToken } from "../tokenHandler";
+
+const client = new OAuth2Client();
 
 export async function GET(request: NextRequest) {
   const email = request.nextUrl.searchParams.get("email");
   const id = request.nextUrl.searchParams.get("id");
   const query = request.nextUrl.searchParams.get("query");
 
-  //Check for bearer token
-  const headersList = headers();
-  const authHeader = headersList.get("Authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return NextResponse.json(
-      { message: "Unauthorized Access!" },
-      { status: 401 }
-    );
-  }
-
-  const token = authHeader.split(" ")[1];
-
   try {
     //decode token and get jwt payload
-    const decoded = jwt.verify(
-      token,
-      process.env.NEXTAUTH_SECRET!
-    ) as JWTPayload;
-
+    const decoded = await verifyToken(request);
     await connectMongoDB();
 
     if (email) {
-      if (email !== decoded.email.toString()) {
+      if (!decoded.email || email !== decoded.email.toString()) {
         return NextResponse.json(
           { message: "Unauthorized Access!" },
           { status: 401 }
@@ -78,7 +66,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     return NextResponse.json(
       { message: (error as { message: string }).message },
-      { status: 404 }
+      { status: 401 }
     );
   }
 }

@@ -2,6 +2,7 @@ import User from "@/models/user";
 import { User as AuthUser, SessionStrategy } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
 import { connectMongoDB } from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -30,19 +31,24 @@ export const authOptions = {
         try {
           if (credentials) {
             // Check if user exists
+
             const user = await User.findOne({ email: credentials.email });
 
-            if (user && user.password) {
-              // Check if password is correct
-              const isPasswordCorrect = await bcrypt.compare(
-                credentials.password,
-                user.password
-              );
+            if (user) {
+              if (user.provider === "credentials" && user.password) {
+                // Check if password is correct
+                const isPasswordCorrect = await bcrypt.compare(
+                  credentials.password,
+                  user.password
+                );
 
-              if (isPasswordCorrect) {
-                return user as AuthUser;
+                if (isPasswordCorrect) {
+                  return user as AuthUser;
+                } else {
+                  throw new Error("invalid password");
+                }
               } else {
-                throw new Error("invalid password");
+                throw new Error("User already exists with different provider!");
               }
             } else {
               throw new Error("User doesn't exist");
@@ -61,7 +67,11 @@ export const authOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      allowDangerousEmailAccountLinking: true, // sign in with different OAuth providers with same email
+    }),
+
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID as string,
+      clientSecret: process.env.GITHUB_SECRET as string,
     }),
   ],
 
@@ -82,13 +92,50 @@ export const authOptions = {
               name: user.name,
               email: user.email,
               image: user.image,
+              provider: "google",
             });
 
             await newUser.save();
+          } else {
+            if (existingUser.provider !== "google")
+              throw new Error("User already exists with different provider!");
+
+            return true;
+          }
+        } catch (err: unknown) {
+          if (err instanceof Error) {
+            throw new Error(err.message);
+          }
+          return null;
+        }
+      }
+
+      if (account && account.provider == "github") {
+        await connectMongoDB();
+
+        try {
+          const existingUser = await User.findOne({ email: user.email });
+          // If user does not exist : New user
+          if (!existingUser) {
+            const newUser = new User({
+              name: user.name,
+              email: user.email,
+              image: user.image,
+              provider: "github",
+            });
+
+            await newUser.save();
+          } else {
+            if (existingUser.provider !== "github")
+              throw new Error("User already exists with different provider!");
+            return true;
           }
           return true;
-        } catch (err) {
-          throw new Error("Error saving user");
+        } catch (err: unknown) {
+          if (err instanceof Error) {
+            throw new Error(err.message);
+          }
+          return null;
         }
       }
 
@@ -99,27 +146,43 @@ export const authOptions = {
       token,
       user,
       account,
-    }: JWTCallbackParams): Promise<JWT | null> {
+    }: JWTCallbackParams): Promise<JWT | undefined> {
+      //
       if (Date.now() < token.accessTokenExpires - 100000 || 0) {
         return token;
       }
+
       if (account) {
-        // JWT payload with user information
-        const jwtPayload = {
-          id: user.id,
-          email: user.email,
-        };
+        switch (account.provider) {
+          case "credentials":
+            const jwtPayload = {
+              id: user.id,
+              email: user.email,
+            };
 
-        // Generate the JWT Token using NEXTAUTH_SECRET for signing
-        const jwtToken = jwt.sign(jwtPayload, process.env.NEXTAUTH_SECRET!);
+            const jwtToken = jwt.sign(jwtPayload, process.env.NEXTAUTH_SECRET!);
 
-        return {
-          accessToken: jwtToken,
-          accessTokenExpires: Date.now() + 3600000, //1hr
-          user,
-        };
-      } else {
-        return null;
+            return {
+              provider: account.provider,
+              accessToken: jwtToken,
+              accessTokenExpires: Date.now() + 105000,
+              user,
+            };
+          case "google":
+            return {
+              provider: account.provider,
+              accessToken: account.id_token!,
+              accessTokenExpires: Date.now() + 105000,
+              user,
+            };
+          case "github":
+            return {
+              provider: account.provider,
+              accessToken: account.access_token!,
+              accessTokenExpires: Date.now() + 105000,
+              user,
+            };
+        }
       }
     },
 
@@ -128,8 +191,11 @@ export const authOptions = {
       if (session && token) {
         session.user = token.user;
         session.accessToken = token.accessToken;
+        session.expires = token.accessTokenExpires.toString();
         session.expire_time = token.accessTokenExpires;
+        session.provider = token.provider;
       }
+
       return session;
     },
   },
@@ -142,5 +208,6 @@ export const authOptions = {
 
   pages: {
     signIn: "/login",
+    error: "/login",
   },
 };

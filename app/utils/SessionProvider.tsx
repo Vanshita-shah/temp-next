@@ -17,10 +17,10 @@ const AuthProvider = ({ session, children }: AuthProviderProps) => {
         return;
       }
 
-      // Set a timeout with buffer to avoid race conditions in session expiration
+      // Timeout with buffer
       const timeout = setTimeout(() => {
         setIsSessionExpired(true);
-      }, expirationTime - 100000); // Buffer of 100 seconds
+      }, expirationTime - 100000);
 
       return () => clearTimeout(timeout);
     }

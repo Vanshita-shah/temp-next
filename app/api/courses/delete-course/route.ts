@@ -1,35 +1,16 @@
 import { connectMongoDB } from "@/lib/mongodb";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import Course from "@/models/course";
-import { headers } from "next/headers";
-import jwt from "jsonwebtoken";
-import { JWTPayload } from "@/types/types";
+import { verifyToken } from "../../tokenHandler";
 
-export async function DELETE(req: Request) {
-  const { id } = await req.json();
-
-  //Check for bearer token
-  const headersList = headers();
-  const authHeader = headersList.get("Authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return NextResponse.json(
-      { message: "Unauthorized Access!" },
-      { status: 401 }
-    );
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  await connectMongoDB();
-
+export async function DELETE(request: NextRequest) {
+  const { id } = await request.json();
   try {
+    await connectMongoDB();
+
     if (id) {
-      //decode token and get jwt payload
-      const decoded = jwt.verify(
-        token,
-        process.env.NEXTAUTH_SECRET!
-      ) as JWTPayload;
+      const decoded = await verifyToken(request);
 
       // get course data based on courseId
       const course = await Course.findById(id);
@@ -59,7 +40,7 @@ export async function DELETE(req: Request) {
   } catch (error) {
     return NextResponse.json(
       { message: (error as { message: string }).message },
-      { status: 404 }
+      { status: 401 }
     );
   }
 }

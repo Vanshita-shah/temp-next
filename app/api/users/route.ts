@@ -1,31 +1,14 @@
 import { connectMongoDB } from "@/lib/mongodb";
 import User from "@/models/user";
-import { IUser, JWTPayload } from "@/types/types";
-import { headers } from "next/headers";
+import { IUser } from "@/types/types";
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { verifyToken } from "../tokenHandler";
 
 export async function GET(request: NextRequest) {
   const email = request.nextUrl.searchParams.get("email");
 
-  //Check for bearer token
-  const headersList = headers();
-  const authHeader = headersList.get("Authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return NextResponse.json(
-      { message: "Unauthorized Access!" },
-      { status: 401 }
-    );
-  }
-
-  const token = authHeader.split(" ")[1];
-
   try {
-    //decode token and get jwt payload
-    const decoded = jwt.verify(
-      token,
-      process.env.NEXTAUTH_SECRET!
-    ) as JWTPayload;
+    const decoded = await verifyToken(request);
 
     await connectMongoDB();
 
@@ -51,7 +34,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     return NextResponse.json(
       { message: (error as { message: string }).message },
-      { status: 404 }
+      { status: 401 }
     );
   }
 }

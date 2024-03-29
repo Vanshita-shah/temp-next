@@ -1,38 +1,24 @@
 import { connectMongoDB } from "@/lib/mongodb";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import Course from "@/models/course";
 import { ICourse, JWTPayload } from "@/types/types";
 import { revalidateTag } from "next/cache";
 import { headers } from "next/headers";
 import jwt from "jsonwebtoken";
+import { verifyToken } from "../../tokenHandler";
 
-export async function PUT(req: Request) {
-  const body: [ICourse, string] = await req.json();
+export async function PUT(request: NextRequest) {
+  const body: [ICourse, string] = await request.json();
 
   const editedCourseData = body[0];
   const id = body[1];
-
-  //Check for bearer token
-  const headersList = headers();
-  const authHeader = headersList.get("Authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return NextResponse.json(
-      { message: "Unauthorized Access!" },
-      { status: 401 }
-    );
-  }
-
-  const token = authHeader.split(" ")[1];
 
   await connectMongoDB();
 
   try {
     if (id) {
-      const decoded = jwt.verify(
-        token,
-        process.env.NEXTAUTH_SECRET!
-      ) as JWTPayload;
+      const decoded = await verifyToken(request);
 
       // get course data based on courseId
       const course = await Course.findById(id);

@@ -1,20 +1,15 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
 const SignInWithGoogle = () => {
-  const router = useRouter();
   return (
     //SignIn using google provider of NextAuth
     <button
       type="button"
       className="mt-4 bg-bg-color  px-2 py-2 flex items-center justify-center"
       onClick={async () => {
-        const res = await signIn("google");
-        if (res) {
-          router.replace("/courses");
-        }
+        await signIn("google");
       }}
     >
       Login with Google

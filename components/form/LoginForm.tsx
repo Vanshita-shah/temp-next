@@ -4,12 +4,21 @@ import ErrorMsg from "@/components/form/ErrorMsg";
 import SignInWithGoogle from "@/components/form/SignInWithGoogle";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import SignInWithGithub from "./SignInWithGithub";
 
 const LoginForm = () => {
   const [error, setError] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const errorMessage = searchParams.get("error");
+
+  useEffect(() => {
+    if (errorMessage) {
+      setError(errorMessage);
+    }
+  }, [errorMessage]);
 
   const handleLogin = async (formData: FormData) => {
     const email: string = formData.get("email") as string;
@@ -17,17 +26,17 @@ const LoginForm = () => {
 
     // SignIn using credentials-provider from nextAuth
     const res = await signIn("credentials", {
-      redirect: false,
+      redirect: true,
       email,
       password,
     });
 
-    if (res?.error) {
-      setError(res.error);
-    } else {
-      // if login successfull redirect to dashboard page
-      router.replace("/courses");
-    }
+    // if (res?.error) {
+    //   setError(res.error);
+    // } else {
+    //   // if login successfull redirect to dashboard page
+    //   router.replace("/courses");
+    // }
   };
 
   return (
@@ -58,6 +67,7 @@ const LoginForm = () => {
       <Button text={"Login"} />
 
       <SignInWithGoogle />
+      <SignInWithGithub />
 
       <Link className="text-sm mt-3 text-right" href={"/register"}>
         Dont have an account? <span className="underline">Register</span>

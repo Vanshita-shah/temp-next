@@ -52,6 +52,7 @@ export const registerAction = async (
       email: email,
       password: password,
       image: imageURL,
+      provider: "credentials",
     };
 
     // pass user data as body to register api
