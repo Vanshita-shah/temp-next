@@ -165,21 +165,21 @@ export const authOptions = {
             return {
               provider: account.provider,
               accessToken: jwtToken,
-              accessTokenExpires: Date.now() + 105000,
+              accessTokenExpires: Date.now() + 3600000,
               user,
             };
           case "google":
             return {
               provider: account.provider,
               accessToken: account.id_token!,
-              accessTokenExpires: Date.now() + 105000,
+              accessTokenExpires: Date.now() + 3600000,
               user,
             };
           case "github":
             return {
               provider: account.provider,
               accessToken: account.access_token!,
-              accessTokenExpires: Date.now() + 105000,
+              accessTokenExpires: Date.now() + 3600000,
               user,
             };
         }

@@ -1,5 +1,5 @@
 "use client";
-
+// TODO: Chat feature using socket
 import { CardActionsProps } from "@/types/types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -48,7 +48,7 @@ const CourseCardActions = ({ course, currentUser }: CardActionsProps) => {
         </>
       )}
 
-      <MdChat className="fill-primary duration-300 hover:fill-primary-dark hover:scale-110" />
+      {/* <MdChat className="fill-primary duration-300 hover:fill-primary-dark hover:scale-110" /> */}
       {/* <div className="fixed top-0 left-0 w-full h-full bg-black/60 bg-opacity-75 flex items-center justify-center z-50">
         <div
           id="drawer-right-example"
